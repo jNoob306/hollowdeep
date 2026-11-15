@@ -47,7 +47,7 @@ Rules for every character image:
 ## Main character: The Delver (`player.glb`)
 
 ```text
-Weathered cave hunter and survivor, lean and hardened, mid-40s, short grey-streaked hair, scarred stubbled face, tired sharp eyes, hood down, layered patched leather armor over wool, fur-lined collar, leather bracers, wrapped forearms, belt with pouches and a coiled rope, bone and tooth trinkets, small brass lantern hooked on the belt, knee-high wrapped boots. Full body, front view, T-pose, arms straight out to the sides, legs slightly apart, empty hands, plain light grey background, flat even lighting, no shadows, realistic dark fantasy game character, muted earthy colors, highly detailed
+Tall weathered cave hunter and survivor, lean and hardened, long legs, realistic adult human proportions, mid-40s, short grey-streaked hair, scarred stubbled face, tired sharp eyes, hood down, layered patched leather armor over wool, fur-lined collar, leather bracers, wrapped forearms, belt with pouches and a coiled rope, bone and tooth trinkets, small brass lantern hooked on the belt, short hip-length tunic, trousers, knee-high wrapped boots. Full body, front view, T-pose, arms raised horizontally at shoulder height straight out to the sides, legs slightly apart, empty open hands with five fingers each, plain light grey background, flat even lighting, no shadows, realistic dark fantasy game character, muted earthy colors, highly detailed
 ```
 
 **Animations:** idle, walk, run, dodge roll, light attack, heavy attack, block, hit reaction, death, climb, mining or digging. Drinking the flask isn't in the library, so the game reuses a similar clip.
