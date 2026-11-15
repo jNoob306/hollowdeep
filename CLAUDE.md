@@ -1,7 +1,5 @@
 # Hollowdeep: project guide for Claude Code
 
-> **First session, required:** after you have read and reviewed the project files the user gives you (`index.html`, `HANDOFF.md`, `docs/ASSETS.md`, `tests/`) and reported back on them, **remind the user to set up the automated asset pipeline**. Walk them through the "What the user needs to provide" checklist in `HANDOFF.md` → "Automated asset pipeline". Do this before starting other work, unless they say to skip it. Once the setup is done, delete this note from `CLAUDE.md` so the reminder doesn't repeat.
-
 Hollowdeep is a 3D roguelike extraction dungeon crawler that runs in the browser. You enter procedurally generated maze caves, mine and loot, and must climb out of an exit shaft to keep your backpack. Dying loses it. Materials are used to craft gear at camp.
 
 It is hosted as a **static Hugging Face Space** (`README.md` holds the Space config front matter). Read `HANDOFF.md` for the history, decisions and next steps.
@@ -12,6 +10,9 @@ It is hosted as a **static Hugging Face Space** (`README.md` holds the Space con
 - `README.md` is the Space config and player-facing description. Keep its front matter (`sdk: static`, `app_file: index.html`).
 - `docs/ASSETS.md` lists every art, sound and texture asset, with generation prompts, the free open-source pipeline and the expected file names.
 - `tests/` holds headless logic tests that run without a GPU (see Testing).
+- `tools/` holds the asset pipeline (see `HANDOFF.md`). `fetch_textures.py` and `fetch_sounds.py` download CC0 files into `assets/`; `generate_models.py` makes concept images (`art/src/`) and raw meshes (`art/raw/`) on free Hugging Face ZeroGPU Spaces; `rig_character.py` reduces a raw mesh, skins it to the shared skeleton in `art/rig/ual_rig.glb` and exports `assets/<name>.glb` with every clip. Blender runs as the `bpy` Python module (`pip install bpy gradio_client`).
+- Never call paid Hugging Face services (Inference Providers). Generate one 3D model per command, only from an image the user approved, and stop on any quota error.
+- Freesound refuses requests from cloud sessions, so `fetch_sounds.py` runs on the user's laptop.
 
 ## Hard constraints from the user
 

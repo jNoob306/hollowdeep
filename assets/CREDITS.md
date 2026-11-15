@@ -13,3 +13,10 @@ Every file here is CC0 (public domain) or generated for this project.
 | `tex_rust_*.jpg` | Poly Haven | https://polyhaven.com/a/rusty_metal_02 | CC0 |
 | `tex_wetrock_*.jpg` | Poly Haven | https://polyhaven.com/a/dry_riverbed_rock | CC0 |
 | `tex_wood_*.jpg` | Poly Haven | https://polyhaven.com/a/weathered_brown_planks | CC0 |
+
+## Models
+
+| File | Source | License |
+| --- | --- | --- |
+| `player.glb` (mesh and texture) | Generated for this project: FLUX.1 schnell image (`art/src/player_s5.png`), TRELLIS.2 image-to-3D, reduced and skinned by `tools/rig_character.py` | Generated |
+| Skeleton and animation clips in every character GLB, and `art/rig/ual_rig.glb` | Quaternius Universal Animation Library and Quaternius character models, https://quaternius.com | CC0 |
