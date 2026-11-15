@@ -28,10 +28,10 @@ Every 3D asset goes through the same free pipeline: generate an image, turn it i
 
 Rules for every character image:
 
-- Full body, front view, T-pose with arms straight out and legs slightly apart.
+- Full body, front view, strict T-pose: arms fully extended, level with the ground, elbows straight; legs straight and slightly apart. The skeleton's rest pose is a T-pose, so the closer the image, the better the rig.
 - Plain light grey background, flat lighting, no shadows.
-- Empty hands. Weapons are separate files.
-- No long capes, no robes hiding the legs, no hair over the face.
+- Empty open hands with five fingers. Weapons and held items (lanterns included) are separate files; anything named in the prompt tends to end up in a hand.
+- No long capes, no hoods, no robes or tunics hiding the legs, no hair over the face. Write "bare head" instead of "hood down".
 - Two arms, two legs, one head. Extra shapes stay rigid.
 
 | Tool | Used for | License |
@@ -64,38 +64,38 @@ Tall weathered cave hunter and survivor, lean and hardened, long legs, realistic
 
 ### Feral Delver
 ```text
-Feral starving cave explorer gone mad, gaunt emaciated man, torn filthy shirt and trousers, bare dirty feet, long matted hair tied back, wild wide eyes, cracked lips, broken leather straps hanging, grime-covered skin. Full body, front view, T-pose, arms straight out to the sides, legs slightly apart, empty hands, plain light grey background, flat even lighting, no shadows, realistic dark fantasy game character, muted earthy colors, highly detailed
+Feral starving cave explorer gone mad, gaunt emaciated man, torn filthy shirt and trousers, bare dirty feet, long matted hair tied back, wild wide eyes, cracked lips, broken leather straps hanging, grime-covered skin. Full body, front view, strict T-pose character reference sheet, both arms fully extended straight out sideways at a 90 degree angle to the body, arms perfectly horizontal and parallel to the ground, elbows straight, palms facing down, legs straight and slightly apart, empty open hands with five fingers each, holding nothing, no cape, plain light grey background, flat even lighting, no shadows, realistic dark fantasy game character, muted earthy colors, highly detailed
 ```
 **Animations:** crawl, fast crawl or run, lunge attack, hit reaction, death.
 
 ### Hollow Miner
 ```text
-Undead miner corpse, dried leathery grey skin stretched over bones, sunken empty eye sockets with faint glow, dented metal mining helmet with a dead candle, torn canvas work clothes, rotted suspenders, heavy work boots, rusted chain around the waist. Full body, front view, T-pose, arms straight out to the sides, legs slightly apart, empty hands, plain light grey background, flat even lighting, no shadows, realistic dark fantasy game character, muted earthy colors, highly detailed
+Undead mummified miner, a whole human body fully covered in dried leathery grey skin and thin flesh, not a skeleton, adult human proportions, sunken empty eye sockets with faint glow, dented metal mining helmet with a dead candle, torn canvas work clothes, rotted suspenders, heavy work boots, rusted chain around the waist. Full body, front view, strict T-pose character reference sheet, both arms fully extended straight out sideways at a 90 degree angle to the body, arms perfectly horizontal and parallel to the ground, elbows straight, palms facing down, legs straight and slightly apart, empty open hands with five fingers each, holding nothing, no cape, plain light grey background, flat even lighting, no shadows, realistic dark fantasy game character, muted earthy colors, highly detailed
 ```
 **Animations:** zombie idle, zombie walk, overhead swing, hit reaction, death.
 
 ### Spore Hermit
 ```text
-Cave hermit overgrown with fungus, hunched old man, glowing green bracket fungi and small mushrooms growing from shoulders, back and one side of the face, mottled pale skin, tattered short tunic and wrapped legs, swollen spore sacs on the neck, bioluminescent green spots. Full body, front view, T-pose, arms straight out to the sides, legs slightly apart, empty hands, plain light grey background, flat even lighting, no shadows, realistic dark fantasy game character, muted earthy colors, highly detailed
+Tall thin human cave hermit overgrown with fungus, old man with realistic adult human proportions and long legs, standing upright, glowing green bracket fungi and small mushrooms growing from shoulders, back and one side of the face, mottled pale skin, tattered short tunic and wrapped legs, swollen spore sacs on the neck, bioluminescent green spots. Full body, front view, strict T-pose character reference sheet, both arms fully extended straight out sideways at a 90 degree angle to the body, arms perfectly horizontal and parallel to the ground, elbows straight, palms facing down, legs straight and slightly apart, empty open hands with five fingers each, holding nothing, no cape, plain light grey background, flat even lighting, no shadows, realistic dark fantasy game character, muted earthy colors, highly detailed
 ```
 **Animations:** idle, walk, throw or spell cast, hit reaction, death.
 
 ### Chain Jailer
 ```text
-Huge brutish prison jailer, very broad shoulders and thick arms, pot belly, iron mask covering the face with eye slits, heavy leather apron over a bare scarred chest, iron shackles and broken chains hanging from both wrists, thick leather gloves, heavy boots. Full body, front view, T-pose, arms straight out to the sides, legs slightly apart, empty hands, plain light grey background, flat even lighting, no shadows, realistic dark fantasy game character, muted earthy colors, highly detailed
+Huge brutish human prison jailer, very broad shoulders and thick arms, pot belly, head fully enclosed in a riveted iron mask with eye slits, heavy leather apron over a bare scarred chest, iron shackles and broken chains hanging from both wrists, thick leather gloves, heavy boots. Full body, front view, strict T-pose character reference sheet, both arms fully extended straight out sideways at a 90 degree angle to the body, arms perfectly horizontal and parallel to the ground, elbows straight, palms facing down, legs straight and slightly apart, empty open hands with five fingers each, holding nothing, no cape, plain light grey background, flat even lighting, no shadows, realistic dark fantasy game character, muted earthy colors, highly detailed
 ```
 **Animations:** idle with shield, heavy walk, block, downward smash, hit reaction, death.
 
 ### Pale Stalker
 ```text
-Eyeless cave-dwelling humanoid, tall and thin with long limbs, smooth pale translucent skin with visible veins, smooth face where eyes should be, large ears, sharp teeth, bone armor plates strapped to shoulders and shins, loincloth of pale hide, bone trinkets. Full body, front view, T-pose, arms straight out to the sides, legs slightly apart, empty hands, plain light grey background, flat even lighting, no shadows, realistic dark fantasy game character, muted earthy colors, highly detailed
+Eyeless cave-dwelling humanoid, tall and thin with long limbs, smooth pale translucent skin with visible veins, smooth face where eyes should be, large ears, sharp teeth, bone armor plates strapped to shoulders and shins, loincloth of pale hide, bone trinkets. Full body, front view, strict T-pose character reference sheet, both arms fully extended straight out sideways at a 90 degree angle to the body, arms perfectly horizontal and parallel to the ground, elbows straight, palms facing down, legs straight and slightly apart, empty open hands with five fingers each, holding nothing, no cape, plain light grey background, flat even lighting, no shadows, realistic dark fantasy game character, muted earthy colors, highly detailed
 ```
 **Animations:** sneak or crouch walk, sword slash, jump attack, hit reaction, death.
 
 ## The Bellman, the stalker (`stalker_bellman.glb`)
 
 ```text
-Gaunt giant figure with its entire head sealed inside a cracked rusted iron church bell, the bell resting on its shoulders, very tall thin body, long arms with oversized grey hands, ragged sackcloth wrapped around the torso, rusted chains looped around the waist, bare grey legs and feet. Full body, front view, T-pose, arms straight out to the sides, legs slightly apart, empty hands, plain light grey background, flat even lighting, no shadows, realistic dark fantasy horror game character, highly detailed
+Gaunt giant figure with its entire head sealed inside a cracked rusted iron church bell, the bell resting on its shoulders, very tall thin body, long arms with oversized grey hands, ragged sackcloth wrapped around the torso, rusted chains looped around the waist, bare grey legs and feet. Full body, front view, strict T-pose character reference sheet, both arms fully extended straight out sideways at a 90 degree angle to the body, arms perfectly horizontal and parallel to the ground, elbows straight, palms facing down, legs straight and slightly apart, empty open hands with five fingers each, holding nothing, no cape, plain light grey background, flat even lighting, no shadows, realistic dark fantasy horror game character, highly detailed
 ```
 **Animations:** slow zombie walk, idle, a head-tilt or look-around idle for listening, a grab or two-handed reach, and a hit reaction for the stagger.
 
@@ -111,19 +111,19 @@ If the bell comes out warped, generate the figure "hooded in ragged sackcloth" i
 
 ### The Crystal Warden
 ```text
-Towering armored knight boss overgrown with glowing blue crystals, crystal shards bursting through the shoulder plates, back and helmet, cracked ancient plate armor, glowing blue light leaking from the cracks and visor, tattered short tabard to the waist, massive gauntlets, armored legs fully visible. Full body, front view, T-pose, arms straight out to the sides, legs slightly apart, empty hands, plain light grey background, flat even lighting, no shadows, realistic dark fantasy game boss, highly detailed
+Towering armored knight boss overgrown with glowing blue crystals, crystal shards bursting through the shoulder plates, back and helmet, cracked ancient plate armor, glowing blue light leaking from the cracks and visor, tattered short tabard to the waist, massive gauntlets, armored legs fully visible. Full body, front view, strict T-pose character reference sheet, both arms fully extended straight out sideways at a 90 degree angle to the body, arms perfectly horizontal and parallel to the ground, elbows straight, palms facing down, legs straight and slightly apart, empty open hands with five fingers each, holding nothing, no cape, plain light grey background, flat even lighting, no shadows, realistic dark fantasy game boss, highly detailed
 ```
 **Animations:** heavy idle, heavy walk, two-handed overhead slam, sweeping swing, jump attack, roar, death.
 
 ### The Lantern Mother
 ```text
-Tall emaciated female boss figure, very long thin arms and clawed fingers, torn grey burial veil over a skeletal face, faint orange glow from the mouth and eyes, iron hooks in her back with several small lanterns hanging on short chains, tattered short burial dress above the knees, bare bony legs, cracked grey skin. Full body, front view, T-pose, arms straight out to the sides, legs slightly apart, empty hands, plain light grey background, flat even lighting, no shadows, realistic dark fantasy game boss, highly detailed
+Tall emaciated female boss figure, very long thin arms and clawed fingers, torn grey burial veil over a skeletal face, faint orange glow from the mouth and eyes, iron hooks in her back with several small lanterns hanging on short chains, tattered short burial dress above the knees, bare bony legs, cracked grey skin. Full body, front view, strict T-pose character reference sheet, both arms fully extended straight out sideways at a 90 degree angle to the body, arms perfectly horizontal and parallel to the ground, elbows straight, palms facing down, legs straight and slightly apart, empty open hands with five fingers each, holding nothing, no cape, plain light grey background, flat even lighting, no shadows, realistic dark fantasy game boss, highly detailed
 ```
 **Animations:** idle, slow walk, claw swipe, scream, spell cast, death. If the lanterns come out warped, generate her without them; the code hangs copies of `prop_lantern.glb` from her back.
 
 ### The Ossuary King
 ```text
-Giant humanoid boss made of hundreds of fused human bones and skulls, hulking shoulders and long heavy arms, a ribcage chest with a glowing red heart-like ember inside, a crowned skull head with a rusted iron crown, tattered royal cloth strips at the waist, thick bone legs, red light glowing between the bones. Full body, front view, T-pose, arms straight out to the sides, legs slightly apart, empty hands, plain light grey background, flat even lighting, no shadows, realistic dark fantasy game boss, highly detailed
+Giant humanoid boss made of hundreds of fused human bones and skulls, hulking shoulders and long heavy arms, a ribcage chest with a glowing red heart-like ember inside, a crowned skull head with a rusted iron crown, tattered royal cloth strips at the waist, thick bone legs, red light glowing between the bones. Full body, front view, strict T-pose character reference sheet, both arms fully extended straight out sideways at a 90 degree angle to the body, arms perfectly horizontal and parallel to the ground, elbows straight, palms facing down, legs straight and slightly apart, empty open hands with five fingers each, holding nothing, no cape, plain light grey background, flat even lighting, no shadows, realistic dark fantasy game boss, highly detailed
 ```
 **Animations:** idle, heavy walk, punch, ground slam, charge or run, roar, death. Phase 2 reuses these clips faster, with a brighter glow.
 

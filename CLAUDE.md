@@ -2,7 +2,7 @@
 
 Hollowdeep is a 3D roguelike extraction dungeon crawler that runs in the browser. You enter procedurally generated maze caves, mine and loot, and must climb out of an exit shaft to keep your backpack. Dying loses it. Materials are used to craft gear at camp.
 
-It is hosted as a **static Hugging Face Space** (`README.md` holds the Space config front matter). Read `HANDOFF.md` for the history, decisions and next steps.
+It is hosted as a **static Hugging Face Space** (`README.md` holds the Space config front matter). Read `HANDOFF.md` for the history, decisions and next steps, and keep `TODO.md` up to date: it is the user's checklist of what is still outstanding.
 
 ## Files
 
