@@ -2,3 +2,4 @@ tests/build/
 __pycache__/
 .env
 node_modules/
+tools/_audition/
