@@ -9,6 +9,9 @@ quota is used up the Space refuses the request and this script stops.
   python3 tools/generate_models.py image player            # one image, seed 1
   python3 tools/generate_models.py image player --seed 7   # try another
   python3 tools/generate_models.py image player --back     # back view
+  python3 tools/generate_models.py image enemy_hermit --tag witch --subject "Gaunt spore witch, ..."
+                                                           # try another design: replaces the description,
+                                                           # keeps the pose wording, saves as <name>_<tag>_s<seed>.png
   python3 tools/generate_models.py model player 5          # approved image (seed 5) -> 3D
 
 Images are saved to art/src/<name>[_back]_s<seed>.png. Nothing is turned into
@@ -67,7 +70,10 @@ def hf_token():
 def cmd_image(args):
     seeds = [int(args[i + 1]) for i, a in enumerate(args) if a == '--seed']
     back = '--back' in args
-    names = [a for i, a in enumerate(args) if not a.startswith('--') and (i == 0 or args[i - 1] != '--seed')]
+    subject = next((args[i + 1] for i, a in enumerate(args) if a == '--subject'), None)
+    tag = next((args[i + 1] for i, a in enumerate(args) if a == '--tag'), '')
+    names = [a for i, a in enumerate(args)
+             if not a.startswith('--') and (i == 0 or args[i - 1] not in ('--seed', '--subject', '--tag'))]
     bad = [n for n in names if n not in CHARACTERS]
     if bad or not names:
         sys.exit(f'Give one or more of: {", ".join(CHARACTERS)}')
@@ -80,9 +86,11 @@ def cmd_image(args):
     os.makedirs(OUT, exist_ok=True)
     for name, seed in jobs:
         prompt = prompt_for(name)
+        if subject:  # try a different design while keeping the standard pose wording
+            prompt = subject.rstrip('. ') + '. ' + prompt[prompt.index('Full body, front view'):]
         if back:
             prompt = prompt.replace('front view', 'back view, seen from behind')
-        dst = os.path.join(OUT, f'{name}{"_back" if back else ""}_s{seed}.png')
+        dst = os.path.join(OUT, f'{name}{"_" + tag if tag else ""}{"_back" if back else ""}_s{seed}.png')
         try:
             result, _ = client.predict(prompt=prompt, seed=seed, randomize_seed=False, width=1024, height=1024,
                                        num_inference_steps=4, api_name='/infer')
