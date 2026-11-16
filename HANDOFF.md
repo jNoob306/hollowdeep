@@ -43,7 +43,7 @@ The game is playable end to end: camp → cave → exit shaft or death → camp 
   | --- | --- |
   | Feral Delver | `crawler` |
   | Hollow Miner, in groups | `swarm` (the mites) |
-  | Spore Hermit | `spitter` |
+  | Druid Shaman (replaced the Spore Hermit) | `spitter` |
   | Chain Jailer | `brute` |
   | Pale Stalker | `elite` |
 

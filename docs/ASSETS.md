@@ -58,7 +58,7 @@ Tall weathered cave hunter and survivor, lean and hardened, long legs, realistic
 | --- | --- | --- | --- | --- |
 | Feral Delver | Fast and weak | `crawler` | `enemy_feral.glb` | none |
 | Hollow Miner | Basic melee, groups of 2 to 3 | `swarm` | `enemy_miner.glb` | `weapon_pickaxe.glb` |
-| Spore Hermit | Ranged spores | `spitter` | `enemy_hermit.glb` | none |
+| Druid Shaman | Ranged spore and curse caster | `spitter` | `enemy_druid.glb` | none |
 | Chain Jailer | Shielded brute | `brute` | `enemy_jailer.glb` | `weapon_celldoor.glb`, `weapon_club.glb` |
 | Pale Stalker | Elite | `elite` | `enemy_stalker.glb` | `weapon_boneblade.glb` |
 
@@ -74,9 +74,9 @@ Undead miner with a bare bone skull for a head and bare skeleton hands, tall thi
 ```
 **Animations:** zombie idle, zombie walk, overhead swing, hit reaction, death.
 
-### Spore Hermit
+### Druid Shaman
 ```text
-Tall thin old human hermit infected by fungus, bald head, long grey beard, mottled pale skin with green glowing spots, small glowing green mushrooms and bracket fungi growing only on his shoulders and upper back, ragged short-sleeved tunic ending at the hips, wrapped trousers, bare feet. Full body, front view, strict T-pose character reference sheet, both arms fully extended straight out sideways at a 90 degree angle to the body, arms perfectly horizontal and parallel to the ground, elbows straight, palms facing down, legs straight and slightly apart, empty open hands with five fingers each, holding nothing, no cape, plain light grey background, flat even lighting, no shadows, realistic dark fantasy game character, muted earthy colors, highly detailed
+Feral female cave druid shaman, tall lean adult woman, fierce gaunt face with white bone-ash war paint and dark sunken eyes, long dark hair tied back in braids away from the face, a headdress of small deer antlers and bones, short ragged fur mantle over the shoulders only, chest wrap and a short hip-length hide tunic, bare arms wrapped in leather cord with bone bracelets, necklaces of teeth, feathers and small bones, a belt of hanging pouches and dried herbs, hide leggings, bare feet, faint green glowing spore dust on her hands. Full body, front view, strict T-pose character reference sheet, both arms fully extended straight out sideways at a 90 degree angle to the body, arms perfectly horizontal and parallel to the ground, elbows straight, palms facing down, legs straight and slightly apart, empty open hands with five fingers each, holding nothing, no cape, plain light grey background, flat even lighting, no shadows, realistic dark fantasy game character, muted earthy colors, highly detailed
 ```
 **Animations:** idle, walk, throw or spell cast, hit reaction, death.
 
@@ -248,7 +248,7 @@ Game inventory icon of [MATERIAL], centered, single object, dark fantasy style, 
 ## Checklist
 
 - [ ] `player.glb`
-- [ ] `enemy_feral.glb`, `enemy_miner.glb`, `enemy_hermit.glb`, `enemy_jailer.glb`, `enemy_stalker.glb`
+- [ ] `enemy_feral.glb`, `enemy_miner.glb`, `enemy_druid.glb`, `enemy_jailer.glb`, `enemy_stalker.glb`
 - [ ] `stalker_bellman.glb` (plus `prop_bell.glb` only if the bell is made separately)
 - [ ] `boss_warden.glb`, `boss_lantern.glb`, `boss_ossuary.glb`
 - [ ] 13 weapon files (`weapon_*.glb`)

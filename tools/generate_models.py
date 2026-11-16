@@ -36,7 +36,7 @@ CHARACTERS = {
     'player': 'Main character: The Delver',
     'enemy_feral': 'Feral Delver',
     'enemy_miner': 'Hollow Miner',
-    'enemy_hermit': 'Spore Hermit',
+    'enemy_druid': 'Druid Shaman',
     'enemy_jailer': 'Chain Jailer',
     'enemy_stalker': 'Pale Stalker',
     'stalker_bellman': 'The Bellman, the stalker',

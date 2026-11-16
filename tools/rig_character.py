@@ -12,17 +12,21 @@ Universal Animation Library skeleton, CC0). Its rest pose is a T-pose, so a
 T-pose mesh only has to be scaled onto it:
 
   1. join the mesh parts, weld seams, reduce to the triangle budget;
-  2. stand the mesh on the ground, facing the same way as the skeleton, and
-     scale it so its arms sit at the skeleton's arm height;
-  3. slide the skeleton's arm bones in or out so the fingertips meet the mesh's;
+  2. stand the mesh on the ground, facing the same way as the skeleton, lift
+     drooping arms level (images rarely give a perfect T-pose), and scale it so
+     its shoulders sit at the skeleton's shoulder height;
+  3. move the skeleton's shoulder joints out to the mesh's shoulders and slide the arm
+     bones in or out so the fingertips meet the mesh's;
   4. skin the mesh, either by copying weights from the reference body that
      ships with the skeleton (default, works on any mesh) or with Blender's
      automatic weights (--auto-weights);
+  (--no-lift skips the arm levelling in step 2, for arms that are bent rather than drooping)
   5. make the hands rigid (finger weights go to the hand bone; --fingers keeps them);
   6. export mesh + skeleton + every clip as one GLB.
 """
-import os, sys
+import math, os, sys
 import bpy
+import bmesh  # must come after bpy
 from mathutils import Vector
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -32,7 +36,8 @@ ARM_BONES = ('clavicle', 'upperarm', 'lowerarm', 'hand', 'thumb', 'index', 'midd
 
 def args():
     a = sys.argv[sys.argv.index('--') + 1:] if '--' in sys.argv else sys.argv[1:]
-    opts = {'tris': 15000, 'auto': '--auto-weights' in a, 'fingers': '--fingers' in a, 'tex': 1024}
+    opts = {'tris': 15000, 'auto': '--auto-weights' in a, 'fingers': '--fingers' in a,
+            'no_lift': '--no-lift' in a, 'tex': 1024}
     pos = []
     i = 0
     while i < len(a):
@@ -75,10 +80,15 @@ def prepare_mesh(path, tris):
         if o.type == 'EMPTY':
             bpy.data.objects.remove(o)
     bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
-    bpy.ops.object.mode_set(mode='EDIT')
-    bpy.ops.mesh.select_all(action='SELECT')
-    bpy.ops.mesh.remove_doubles(threshold=1e-5)
-    bpy.ops.object.mode_set(mode='OBJECT')
+    # Weld the seams, then split every edge shared by more than two faces. Generated meshes
+    # have layers that touch (an apron on a body); welded, those edges stop the reduction
+    # from working and the mesh comes out as shards.
+    bm = bmesh.new()
+    bm.from_mesh(mesh.data)
+    bmesh.ops.remove_doubles(bm, verts=bm.verts, dist=1e-5)
+    bmesh.ops.split_edges(bm, edges=[e for e in bm.edges if len(e.link_faces) > 2])
+    bm.to_mesh(mesh.data)
+    bm.free()
     mesh.data.calc_loop_triangles()
     n = len(mesh.data.loop_triangles)
     if n > tris:
@@ -90,56 +100,91 @@ def prepare_mesh(path, tris):
     return mesh
 
 
-def fit_mesh_to_rig(mesh, arm):
-    """Ground and centre the mesh, then scale it so the arms are at the skeleton's arm height."""
+def fit_mesh_to_rig(mesh, arm, allow_lift=True):
+    """Ground and centre the mesh, lift drooping arms level, and scale it so the
+    shoulders sit at the skeleton's shoulder height."""
     vs = world_verts(mesh)
     zmin = min(v.z for v in vs)
     xs = sorted(v.x for v in vs)
     xmid = (xs[0] + xs[-1]) / 2
     ymid = sorted(v.y for v in vs)[len(vs) // 2]
     half = (xs[-1] - xs[0]) / 2
-    outer = [v.z - zmin for v in vs if abs(v.x - xmid) > 0.7 * half]
-    arm_z = sum(outer) / len(outer)
-    target = (arm.matrix_world @ arm.data.bones['lowerarm_l'].head_local).z
-    s = target / arm_z
-    spine_y = (arm.matrix_world @ arm.data.bones['spine_02'].head_local).y
-    for v in mesh.data.vertices:
-        v.co = Vector(((v.co.x - xmid) * s, (v.co.y - ymid) * s + spine_y, (v.co.z - zmin) * s))
+    height = max(v.z for v in vs) - zmin
+    pts = [[abs(v.x - xmid), v.y - ymid, v.z - zmin, 1 if v.x >= xmid else -1] for v in vs]
+
+    # Fit a straight line through the arms: slices of the outer half of the span, upper body only.
+    bins = {}
+    for ax, _, z, _ in pts:
+        if 0.5 * half < ax < 0.92 * half and z > 0.5 * height:
+            bins.setdefault(int(ax / half * 20), []).append((ax, z))
+    cs = [(sum(p[0] for p in b) / len(b), sum(p[1] for p in b) / len(b)) for b in bins.values()]
+    mx, mz = sum(c[0] for c in cs) / len(cs), sum(c[1] for c in cs) / len(cs)
+    slope = sum((c[0] - mx) * (c[1] - mz) for c in cs) / sum((c[0] - mx) ** 2 for c in cs)
+    base = mz - slope * mx
+    bones = arm.data.bones
+    sh = arm.matrix_world @ bones['upperarm_l'].head_local
+    ratio = sh.x / sh.z                      # how far out the shoulder joint is, per unit of its height
+    pz = base / (1 - ratio * slope)          # shoulder height on the mesh, where the arm line meets it
+    px = ratio * pz
+    lift = -math.atan(slope)
+    if abs(lift) > math.radians(4) and allow_lift:
+        for p in pts:
+            dx, dz = p[0] - px, p[2] - pz
+            if dx <= 0 or dz < slope * dx - 0.1 * height:   # not part of an arm
+                continue
+            t = min(1.0, dx / (0.06 * height))
+            a = lift * t * t * (3 - 2 * t)
+            p[0] = px + dx * math.cos(a) - dz * math.sin(a)
+            p[2] = pz + dx * math.sin(a) + dz * math.cos(a)
+        print(f'arms: lifted {math.degrees(lift):.0f} degrees to level')
+    s = sh.z / pz
+    # Where the arm leaves the body: the widest point of the chest, just under the armpits.
+    chest = sorted(p[0] for p in pts if pz - 0.22 * height < p[2] < pz - 0.12 * height)
+    shoulder_x = chest[int(len(chest) * 0.98)] * s if chest else sh.x
+    shoulder_x = min(max(shoulder_x, 0.8 * sh.x), 2.2 * sh.x)
+    spine_y = (arm.matrix_world @ bones['spine_02'].head_local).y
+    for v, p in zip(mesh.data.vertices, pts):
+        v.co = Vector((p[3] * p[0] * s, p[1] * s + spine_y, p[2] * s))
     mesh.data.update()
     vs = world_verts(mesh)
-    print(f'fit: scale {s:.3f}, height {max(v.z for v in vs):.2f} m, half span {max(abs(v.x) for v in vs):.2f} m')
-    return max(abs(v.x) for v in vs)
+    print(f'fit: scale {s:.3f}, height {max(v.z for v in vs):.2f} m, half span {max(abs(v.x) for v in vs):.2f} m, '
+          f'shoulder at {shoulder_x:.2f} m (skeleton {sh.x:.2f})')
+    return max(abs(v.x) for v in vs), shoulder_x
 
 
-def fit_arms(arm, mesh_tip_x):
-    """Stretch or shrink both arm chains sideways so the fingertips reach the mesh's fingertips."""
+def fit_arms(arm, mesh_tip_x, mesh_shoulder_x):
+    """Move the shoulder joints out to the mesh's shoulders, then stretch or shrink both
+    arm chains so the fingertips reach the mesh's fingertips. Returns what was done so the
+    reference body can be reshaped the same way."""
     only([arm])
     bpy.ops.object.mode_set(mode='EDIT')
     eb = arm.data.edit_bones
     shoulder = eb['upperarm_l'].head.x
     tip = max(b.tail.x for b in eb if b.name.startswith('middle'))
-    k = (mesh_tip_x - shoulder) / (tip - shoulder)
+    k = (mesh_tip_x - mesh_shoulder_x) / (tip - shoulder)
     for b in eb:
-        if b.name.startswith(ARM_BONES) and not b.name.startswith('clavicle'):
+        if b.name.startswith('clavicle'):
+            b.tail.x = (1 if b.tail.x >= 0 else -1) * mesh_shoulder_x
+        elif b.name.startswith(ARM_BONES):
             for p in (b.head, b.tail):
                 sign = 1 if p.x >= 0 else -1
-                p.x = sign * (shoulder + (abs(p.x) - shoulder) * k)
-        elif b.name.startswith('clavicle'):
-            pass  # tail follows the shoulder, which does not move
+                p.x = sign * (mesh_shoulder_x + (abs(p.x) - shoulder) * k)
     bpy.ops.object.mode_set(mode='OBJECT')
-    print(f'arms: bone chain scaled by {k:.2f}')
-    return k
+    print(f'arms: shoulders moved {mesh_shoulder_x - shoulder:+.2f} m, bone chain scaled by {k:.2f}')
+    return shoulder, mesh_shoulder_x, k
 
 
-def stretch_reference(ref_meshes, arm, k):
-    """Apply the same sideways arm scaling to the reference body so its weights still line up."""
-    shoulder = (arm.matrix_world @ arm.data.bones['upperarm_l'].head_local).x
+def stretch_reference(ref_meshes, shoulder, mesh_shoulder_x, k):
+    """Reshape the reference body the same way (wider or narrower torso, longer or shorter
+    arms) so its weights still line up with the mesh."""
     for o in ref_meshes:
+        inv = o.matrix_world.inverted()
         for v in o.data.vertices:
             w = o.matrix_world @ v.co
-            if abs(w.x) > shoulder:
-                w.x = (1 if w.x > 0 else -1) * (shoulder + (abs(w.x) - shoulder) * k)
-                v.co = o.matrix_world.inverted() @ w
+            ax = abs(w.x)
+            ax = mesh_shoulder_x + (ax - shoulder) * k if ax > shoulder else ax * mesh_shoulder_x / shoulder
+            w.x = ax if w.x >= 0 else -ax
+            v.co = inv @ w
         o.data.update()
 
 
@@ -202,9 +247,8 @@ def main():
     bpy.context.view_layer.update()
     mesh = prepare_mesh(os.path.abspath(src), opts['tris'])
     mesh.name = os.path.splitext(os.path.basename(dst))[0]
-    tip = fit_mesh_to_rig(mesh, arm)
-    k = fit_arms(arm, tip)
-    stretch_reference(ref_meshes, arm, k)
+    tip, shoulder_x = fit_mesh_to_rig(mesh, arm, not opts['no_lift'])
+    stretch_reference(ref_meshes, *fit_arms(arm, tip, shoulder_x))
     skin(mesh, arm, ref_meshes, opts['auto'])
     if not opts['fingers']:
         rigid_hands(mesh)
