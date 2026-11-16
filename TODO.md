@@ -15,17 +15,21 @@ A running list so nothing gets forgotten. Tick items off as they are done. The l
 Image approved by you → 3D model → rigged GLB in `assets/`.
 
 - [x] `player.glb` The Delver (seed 5)
-- [ ] `enemy_feral.glb` Feral Delver
-- [ ] `enemy_miner.glb` Hollow Miner
-- [ ] `enemy_hermit.glb` Spore Hermit
-- [ ] `enemy_jailer.glb` Chain Jailer
-- [ ] `enemy_stalker.glb` Pale Stalker
+- [x] `enemy_feral.glb` Feral Delver (seed 1)
+- [ ] `enemy_miner.glb` Hollow Miner (redesigned prompt; seed 11 awaiting approval)
+- [ ] `enemy_hermit.glb` Spore Hermit (redesigned prompt; seed 11 awaiting approval)
+- [ ] `enemy_jailer.glb` Chain Jailer (redesigned prompt; seed 11 awaiting approval)
+- [x] `enemy_stalker.glb` Pale Stalker (seed 1)
 - [ ] `stalker_bellman.glb` The Bellman
 - [ ] `boss_warden.glb` The Crystal Warden
 - [ ] `boss_lantern.glb` The Lantern Mother
 - [ ] `boss_ossuary.glb` The Ossuary King
 
-Known flaws to revisit on the Delver: open-toed boots, a wooden handle fused to the left hip, fur collar droops when the arms come down.
+Known flaws to revisit:
+- Delver: open-toed boots, a wooden handle fused to the left hip, fur collar droops when the arms come down.
+- Feral Delver: wrist cords are stiff strands; trouser rags flare when he walks.
+- Jailer: wrist chains were dropped from the prompt (they wrecked the pose) and need adding as props.
+- All enemies use 15,000 triangles; 8,000 broke the meshes. If the laptop struggles with many on screen, add lower-detail versions.
 
 ## Other assets
 

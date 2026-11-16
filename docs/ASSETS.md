@@ -21,7 +21,7 @@ Every 3D asset goes through the same free pipeline: generate an image, turn it i
 | Asset type | Triangles | Texture size |
 | --- | --- | --- |
 | Player | about 15,000 | 1K |
-| Enemies | about 8,000 | 1K |
+| Enemies | about 15,000 | 1K |
 | The Bellman and bosses | about 20,000 | 2K |
 | Weapons | 1,000 to 2,000 | 512 |
 | Props | 500 to 3,000 | 512 to 1K |
@@ -70,19 +70,19 @@ Feral starving cave explorer gone mad, gaunt emaciated man, torn filthy shirt an
 
 ### Hollow Miner
 ```text
-Undead mummified miner, a whole human body fully covered in dried leathery grey skin and thin flesh, not a skeleton, adult human proportions, sunken empty eye sockets with faint glow, dented metal mining helmet with a dead candle, torn canvas work clothes, rotted suspenders, heavy work boots, rusted chain around the waist. Full body, front view, strict T-pose character reference sheet, both arms fully extended straight out sideways at a 90 degree angle to the body, arms perfectly horizontal and parallel to the ground, elbows straight, palms facing down, legs straight and slightly apart, empty open hands with five fingers each, holding nothing, no cape, plain light grey background, flat even lighting, no shadows, realistic dark fantasy game character, muted earthy colors, highly detailed
+Gaunt undead human miner, tall thin adult man, pale grey sunken face with hollow dark eyes and a slack jaw, dented metal mining helmet with a dead candle stub, long-sleeved torn canvas work shirt, leather suspenders, patched canvas trousers, heavy work boots, coal dust and grime. Full body, front view, strict T-pose character reference sheet, both arms fully extended straight out sideways at a 90 degree angle to the body, arms perfectly horizontal and parallel to the ground, elbows straight, palms facing down, legs straight and slightly apart, empty open hands with five fingers each, holding nothing, no cape, plain light grey background, flat even lighting, no shadows, realistic dark fantasy game character, muted earthy colors, highly detailed
 ```
 **Animations:** zombie idle, zombie walk, overhead swing, hit reaction, death.
 
 ### Spore Hermit
 ```text
-Tall thin human cave hermit overgrown with fungus, old man with realistic adult human proportions and long legs, standing upright, glowing green bracket fungi and small mushrooms growing from shoulders, back and one side of the face, mottled pale skin, tattered short tunic and wrapped legs, swollen spore sacs on the neck, bioluminescent green spots. Full body, front view, strict T-pose character reference sheet, both arms fully extended straight out sideways at a 90 degree angle to the body, arms perfectly horizontal and parallel to the ground, elbows straight, palms facing down, legs straight and slightly apart, empty open hands with five fingers each, holding nothing, no cape, plain light grey background, flat even lighting, no shadows, realistic dark fantasy game character, muted earthy colors, highly detailed
+Tall thin old human hermit infected by fungus, bald head, long grey beard, mottled pale skin with green glowing spots, small glowing green mushrooms and bracket fungi growing only on his shoulders and upper back, ragged short-sleeved tunic ending at the hips, wrapped trousers, bare feet. Full body, front view, strict T-pose character reference sheet, both arms fully extended straight out sideways at a 90 degree angle to the body, arms perfectly horizontal and parallel to the ground, elbows straight, palms facing down, legs straight and slightly apart, empty open hands with five fingers each, holding nothing, no cape, plain light grey background, flat even lighting, no shadows, realistic dark fantasy game character, muted earthy colors, highly detailed
 ```
 **Animations:** idle, walk, throw or spell cast, hit reaction, death.
 
 ### Chain Jailer
 ```text
-Huge brutish human prison jailer, very broad shoulders and thick arms, pot belly, head fully enclosed in a riveted iron mask with eye slits, heavy leather apron over a bare scarred chest, iron shackles and broken chains hanging from both wrists, thick leather gloves, heavy boots. Full body, front view, strict T-pose character reference sheet, both arms fully extended straight out sideways at a 90 degree angle to the body, arms perfectly horizontal and parallel to the ground, elbows straight, palms facing down, legs straight and slightly apart, empty open hands with five fingers each, holding nothing, no cape, plain light grey background, flat even lighting, no shadows, realistic dark fantasy game character, muted earthy colors, highly detailed
+Tall heavyset human prison jailer, wide shoulders and a thick waist, head fully enclosed in a riveted iron mask with eye slits, long-sleeved padded leather jerkin under a heavy leather apron, iron shackle cuffs on both wrists with no chains, thick leather gloves, trousers and heavy boots. Full body, front view, strict T-pose character reference sheet, both arms fully extended straight out sideways at a 90 degree angle to the body, arms perfectly horizontal and parallel to the ground, elbows straight, palms facing down, legs straight and slightly apart, empty open hands with five fingers each, holding nothing, no cape, plain light grey background, flat even lighting, no shadows, realistic dark fantasy game character, muted earthy colors, highly detailed
 ```
 **Animations:** idle with shield, heavy walk, block, downward smash, hit reaction, death.
 

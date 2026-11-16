@@ -4,6 +4,7 @@
 Runs with Blender's Python module (pip install bpy) or inside Blender:
 
   python3 tools/rig_character.py art/raw/player.glb assets/player.glb --tris 15000
+  (keep --tris at 15000 or more: generated meshes fall apart well below that)
   blender -b -P tools/rig_character.py -- art/raw/player.glb assets/player.glb --tris 15000
 
 The skeleton and animation clips come from art/rig/ual_rig.glb (Quaternius
