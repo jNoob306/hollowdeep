@@ -24,4 +24,6 @@ From depth 2, **the Bellman** stalks the tunnels: an unkillable figure whose bel
 
 **Touch:** left side move stick, drag right side for camera, on-screen buttons.
 
+**Map setting:** the pause menu and the camp's Controls tab have a Map button that cycles between the mini-map plus full map, the full map only (on the Map button), and no map at all.
+
 Tip: open the Space's direct link (the full-screen "static.hf.space" address) if the controller or mouse look does not respond inside the embedded page.

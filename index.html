@@ -115,6 +115,7 @@ button,input{font-family:inherit}
 <div id="pause" class="screen hidden">
   <div class="panel"><h2>Paused</h2>
     <button class="big" id="resume">RESUME</button>
+    <button class="mapOpt" style="margin-top:8px"></button>
     <button id="abandon" style="margin-top:8px">Abandon run (lose backpack)</button>
     <div class="scroll ctl" id="pauseHelp" style="margin-top:10px"></div>
   </div>
@@ -352,10 +353,12 @@ function los(x0,z0,x1,z1){const d=Math.hypot(x1-x0,z1-z0),n=Math.ceil(d/0.7);for
    SAVE / LOAD (camp state only; falls back to memory if storage fails)
    ===================================================================== */
 const SAVE_KEY='hollowdeep_save',SAVE_V=1;
-const defSave=()=>({v:SAVE_V,stash:{},owned:{w:['rusty'],a:['rags']},equip:{w:'rusty',a:'rags'},upg:{flask:0,potency:0,pack:0,torch:0},stats:{runs:0,extracts:0,deaths:0,boss:0,deepest:0},lastSeed:''});
+// Map setting: 'mini' shows the corner mini-map and the full map on the Map button, 'full' only the full map, 'off' no map.
+const MAP_MODES={mini:'Map: mini-map and full map',full:'Map: full map only (Map button)',off:'Map: off'};
+const defSave=()=>({v:SAVE_V,stash:{},owned:{w:['rusty'],a:['rags']},equip:{w:'rusty',a:'rags'},upg:{flask:0,potency:0,pack:0,torch:0},stats:{runs:0,extracts:0,deaths:0,boss:0,deepest:0},lastSeed:'',opts:{map:'mini'}});
 let save=defSave();
 function loadSave(){try{const raw=localStorage.getItem(SAVE_KEY);if(!raw)return;const s=JSON.parse(raw);if(!s||s.v!==SAVE_V)return;
-  const d=defSave();save={...d,...s,owned:{...d.owned,...s.owned},equip:{...d.equip,...s.equip},upg:{...d.upg,...s.upg},stats:{...d.stats,...s.stats}};
+  const d=defSave();save={...d,...s,owned:{...d.owned,...s.owned},equip:{...d.equip,...s.equip},upg:{...d.upg,...s.upg},stats:{...d.stats,...s.stats},opts:{...d.opts,...s.opts}};if(!MAP_MODES[save.opts.map])save.opts.map='mini';
   if(!WEAPONS[save.equip.w])save.equip.w='rusty';if(!ARMORS[save.equip.a])save.equip.a='rags';}catch(e){}}
 function writeSave(){try{localStorage.setItem(SAVE_KEY,JSON.stringify(save));}catch(e){}}
 loadSave();
@@ -1057,7 +1060,7 @@ function toCamp(){state='camp';$('summary').classList.add('hidden');$('pause').c
    ===================================================================== */
 function step(dt){
   if(pressed.pause){pauseRun();return;}
-  if(pressed.map){mapBig=!mapBig;$('map').classList.toggle('big',mapBig);mapT=0;}
+  if(pressed.map&&save.opts.map!=='off'){mapBig=!mapBig;applyMapOpt();}
   updatePlayer(dt);if(state!=='run')return;
   pdistT-=dt;if(pdistT<=0){pdistT=0.25;computePdist();}
   for(const e of enemies)updateEnemy(e,dt);separateEnemies();
@@ -1188,8 +1191,18 @@ function updateHUD(dt,t){
   if(bossRef&&bossRef.alive){$('bossBar').classList.remove('hidden');$('bossF').style.width=bossRef.hp/bossRef.maxHp*100+'%';}
   for(const d of dns){if(d.t<=0)continue;d.t-=dt;if(d.t<=0){d.el.style.display='none';continue;}const s=toScreen(d.x,d.y+(0.8-d.t)*1.2,d.z);
     d.el.style.left=s.x+'px';d.el.style.top=s.y+'px';d.el.style.opacity=s.ok?Math.min(1,d.t*3):0;}
-  mapT-=dt;if(mapT<=0){mapT=0.25;drawMap();}
+  if(mapShown){mapT-=dt;if(mapT<=0){mapT=0.25;drawMap();}}
 }
+// Show or hide the map to match the setting, and label the setting buttons.
+let mapShown=true;
+function applyMapOpt(){
+  const mode=save.opts.map;if(mode==='off')mapBig=false;
+  mapShown=mode==='mini'||(mode==='full'&&mapBig);
+  const m=$('map');m.classList.toggle('big',mapBig);m.classList.toggle('hidden',!mapShown);mapT=0;
+  for(const b of document.querySelectorAll('.mapOpt'))b.textContent=MAP_MODES[mode];
+}
+function cycleMapOpt(){const k=Object.keys(MAP_MODES);save.opts.map=k[(k.indexOf(save.opts.map)+1)%k.length];writeSave();applyMapOpt();}
+document.addEventListener('click',e=>{if(e.target.closest('.mapOpt'))cycleMapOpt();});
 const mctx=$('map').getContext('2d');
 function drawMap(){const c=mctx,S=8;c.clearRect(0,0,352,352);
   for(let z=0;z<GH;z++)for(let x=0;x<GW;x++){const i=z*GW+x;if(!L.explored[i])continue;c.fillStyle=L.g[i]?'#2a2622':'#7d7364';c.fillRect(x*S,z*S,S,S);}
@@ -1260,8 +1273,8 @@ function renderCamp(){
   }else if(campTab==='stash'){
     h+='<h3>Stash</h3><div class="grid">';let n=0;for(const k in MATS)if(s.stash[k]>0){n++;h+=`<div style="color:${MATS[k].c}">${MATS[k].n}<br><b>×${s.stash[k]}</b></div>`;}
     h+='</div>'+(n?'':'<small>Empty. Extract from the cave to bring materials home.</small>')+'<h3>Save</h3>'+rowH('Reset progress','Deletes stash, gear and upgrades',null,'reset',resetArm?'Really reset?':'Reset',false);
-  }else h+='<div class="ctl" style="margin-top:8px">'+CONTROLS+'</div>';
-  $('campBody').innerHTML=h;
+  }else h+='<h3>Settings</h3><button class="mapOpt"></button><div class="ctl" style="margin-top:8px">'+CONTROLS+'</div>';
+  $('campBody').innerHTML=h;applyMapOpt();
 }
 let resetArm=false;
 function campAct(k){const[c,id]=k.split(':'),s=save;
@@ -1281,7 +1294,7 @@ $('lastSeed').addEventListener('click',()=>{$('seedIn').value=save.lastSeed;});
 $('sumBtn').addEventListener('click',toCamp);
 $('resume').addEventListener('click',resumeRun);
 $('abandon').addEventListener('click',()=>{if(state==='pause')endRun('abandon');});
-$('pauseHelp').innerHTML=CONTROLS;
+$('pauseHelp').innerHTML=CONTROLS;applyMapOpt();
 addEventListener('gamepadconnected',()=>{setDevice('pad');if(state==='camp')$('enter').focus();});
 
 /* =====================================================================
