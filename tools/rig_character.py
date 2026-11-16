@@ -105,19 +105,28 @@ def fit_mesh_to_rig(mesh, arm, allow_lift=True):
     shoulders sit at the skeleton's shoulder height."""
     vs = world_verts(mesh)
     zmin = min(v.z for v in vs)
-    xs = sorted(v.x for v in vs)
-    xmid = (xs[0] + xs[-1]) / 2
-    ymid = sorted(v.y for v in vs)[len(vs) // 2]
-    half = (xs[-1] - xs[0]) / 2
     height = max(v.z for v in vs) - zmin
+    # Centre on the legs, not the bounding box: one arm is often longer than the other, and
+    # an off-centre body gets one leg skinned to the other leg's bones.
+    low = [v.x for v in vs if v.z - zmin < 0.45 * height]
+    xmid = sum(low) / len(low)
+    ymid = sorted(v.y for v in vs)[len(vs) // 2]
+    half = max(abs(v.x - xmid) for v in vs)
     pts = [[abs(v.x - xmid), v.y - ymid, v.z - zmin, 1 if v.x >= xmid else -1] for v in vs]
 
-    # Fit a straight line through the arms: slices of the outer half of the span, upper body only.
+    # Fit a straight line through the arms: slices of the outer half of the span, upper body
+    # only. Follow the top surface of each slice, not its middle: cords, chains and fur hang
+    # below an arm and would drag the line down, but nothing sits above it.
     bins = {}
     for ax, _, z, _ in pts:
         if 0.5 * half < ax < 0.92 * half and z > 0.5 * height:
             bins.setdefault(int(ax / half * 20), []).append((ax, z))
-    cs = [(sum(p[0] for p in b) / len(b), sum(p[1] for p in b) / len(b)) for b in bins.values()]
+    tops = []
+    for b in bins.values():
+        zs = sorted(p[1] for p in b)
+        tops.append((sum(p[0] for p in b) / len(b), zs[int(len(zs) * 0.95)], zs[int(len(zs) * 0.95)] - zs[int(len(zs) * 0.05)]))
+    radius = min(t[2] for t in tops) / 2      # the thinnest slice is a bare arm
+    cs = [(t[0], t[1] - radius) for t in tops]
     mx, mz = sum(c[0] for c in cs) / len(cs), sum(c[1] for c in cs) / len(cs)
     slope = sum((c[0] - mx) * (c[1] - mz) for c in cs) / sum((c[0] - mx) ** 2 for c in cs)
     base = mz - slope * mx
@@ -141,6 +150,11 @@ def fit_mesh_to_rig(mesh, arm, allow_lift=True):
     # Where the arm leaves the body: the widest point of the chest, just under the armpits.
     chest = sorted(p[0] for p in pts if pz - 0.22 * height < p[2] < pz - 0.12 * height)
     shoulder_x = chest[int(len(chest) * 0.98)] * s if chest else sh.x
+    # A fur mantle or cape makes the chest look wide. A truly broad character is broad at
+    # the hips too, so don't let the shoulders sit much wider than the hips.
+    hips = sorted(p[0] for p in pts if 0.45 * height < p[2] < 0.55 * height)
+    if hips:
+        shoulder_x = min(shoulder_x, 1.3 * hips[int(len(hips) * 0.98)] * s)
     shoulder_x = min(max(shoulder_x, 0.8 * sh.x), 2.2 * sh.x)
     spine_y = (arm.matrix_world @ bones['spine_02'].head_local).y
     for v, p in zip(mesh.data.vertices, pts):
@@ -215,6 +229,52 @@ def skin(mesh, arm, ref_meshes, auto):
     print('skin: weights copied from the reference body')
 
 
+def fix_sides(mesh):
+    """Keep each limb on its own side's bones. When legs stand closer together than the
+    reference body's, the inside of one leg can pick up the other leg's weights, which
+    stretches a sheet of skin between them as soon as it walks."""
+    limb = ('thigh', 'calf', 'foot', 'ball', 'upperarm', 'lowerarm', 'hand') + ARM_BONES[4:]
+    names = {g.index: g.name for g in mesh.vertex_groups}
+    moved = 0
+    for v in mesh.data.vertices:
+        if abs(v.co.x) < 0.01:
+            continue
+        wrong = '_r' if v.co.x > 0 else '_l'
+        right = '_l' if v.co.x > 0 else '_r'
+        for g in list(v.groups):
+            n = names[g.group]
+            if n.endswith(wrong) and n.startswith(limb):
+                mesh.vertex_groups[n[:-2] + right].add([v.index], g.weight, 'ADD')
+                mesh.vertex_groups[n].remove([v.index])
+                moved += 1
+    if moved:
+        print(f'skin: moved {moved} weights back to their own side')
+
+
+def separate_legs(mesh):
+    """Cut the skin where the two lower legs were generated fused together. A face whose
+    corners belong to both the left and the right lower leg would otherwise stretch into a
+    sheet between the feet with every step."""
+    names = {g.index: g.name for g in mesh.vertex_groups}
+    lower = ('calf', 'foot', 'ball')
+    side = {}
+    for v in mesh.data.vertices:
+        if v.groups:
+            n = names[max(v.groups, key=lambda g: g.weight).group]
+            if n.startswith(lower):
+                side[v.index] = n[-1]
+    bad = [p.index for p in mesh.data.polygons
+           if all(i in side for i in p.vertices) and len({side[i] for i in p.vertices}) > 1]
+    if bad:
+        bm = bmesh.new()
+        bm.from_mesh(mesh.data)
+        bm.faces.ensure_lookup_table()
+        bmesh.ops.delete(bm, geom=[bm.faces[i] for i in bad], context='FACES')
+        bm.to_mesh(mesh.data)
+        bm.free()
+        print(f'skin: cut {len(bad)} faces joining the two lower legs')
+
+
 def rigid_hands(mesh):
     """Move every finger weight onto the hand bone. Generated hands rarely match the
     skeleton's finger layout, and a stiff hand looks far better than crumpled fingers."""
@@ -250,6 +310,8 @@ def main():
     tip, shoulder_x = fit_mesh_to_rig(mesh, arm, not opts['no_lift'])
     stretch_reference(ref_meshes, *fit_arms(arm, tip, shoulder_x))
     skin(mesh, arm, ref_meshes, opts['auto'])
+    fix_sides(mesh)
+    separate_legs(mesh)
     if not opts['fingers']:
         rigid_hands(mesh)
     for o in rig_objs:

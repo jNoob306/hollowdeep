@@ -17,7 +17,7 @@ Image approved by you → 3D model → rigged GLB in `assets/`.
 - [x] `player.glb` The Delver (seed 5)
 - [x] `enemy_feral.glb` Feral Delver (seed 1)
 - [x] `enemy_miner.glb` Hollow Miner (seed 16, skull head and skeleton hands)
-- [ ] `enemy_druid.glb` Druid Shaman (replaced the Spore Hermit; image awaiting approval)
+- [x] `enemy_druid.glb` Druid Shaman (seed 2; replaced the Spore Hermit)
 - [x] `enemy_jailer.glb` Chain Jailer (seed 24)
 - [x] `enemy_stalker.glb` Pale Stalker (seed 1)
 - [ ] `stalker_bellman.glb` The Bellman
@@ -30,6 +30,7 @@ Known flaws to revisit:
 - Feral Delver: wrist cords are stiff strands; trouser rags flare when he walks.
 - Jailer: rigged with `--no-lift` because his elbows are bent; the mask covers only the lower face (a full mask never came with level arms); wrist chains were dropped from the prompt and need adding as props.
 - Hollow Miner: stocky build with a large helmet.
+- Druid Shaman: the roughest of the six. Her fur and hair use most of the triangles, so she is exported at 25,000; her lower legs were generated fused and had to be cut apart, leaving a thin sliver near the feet; the skirt stretches when she sprints; she is dark and may be hard to see in the cave.
 - All enemies use 15,000 triangles; 8,000 broke the meshes. If the laptop struggles with many on screen, add lower-detail versions.
 
 ## Other assets
@@ -55,6 +56,7 @@ Known flaws to revisit:
 
 - [x] Lift drooping arms level before skinning (handles roughly 5 to 25 degrees; bent elbows still need `--no-lift`).
 - [x] Fit the skeleton's shoulders to wide characters, and clean up touching layers so the triangle reduction no longer shreds meshes.
+- [x] Keep each limb's skin on its own side and cut lower legs that were generated fused together.
 - [ ] Fit hip width and leg length the same way; stocky characters (Miner, Jailer) come out over 2.2 m tall because only the shoulders are matched. The game loader should scale each model to its gameplay height.
 - [ ] A reduce-only script for weapons and props.
 
