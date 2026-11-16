@@ -17,20 +17,20 @@ Image approved by you → 3D model → rigged GLB in `assets/`.
 - [x] `player.glb` The Delver (seed 5)
 - [x] `enemy_feral.glb` Feral Delver (seed 1)
 - [x] `enemy_miner.glb` Hollow Miner (seed 16, skull head and skeleton hands)
-- [x] `enemy_druid.glb` Druid Shaman (seed 2; replaced the Spore Hermit)
+- [x] `enemy_druid.glb` Druid Shaman (seed 13, simplified outfit; replaced the Spore Hermit)
 - [x] `enemy_jailer.glb` Chain Jailer (seed 24)
 - [x] `enemy_stalker.glb` Pale Stalker (seed 1)
-- [ ] `stalker_bellman.glb` The Bellman
-- [ ] `boss_warden.glb` The Crystal Warden
-- [ ] `boss_lantern.glb` The Lantern Mother
-- [ ] `boss_ossuary.glb` The Ossuary King
+- [ ] `stalker_bellman.glb` The Bellman (redesigned: round steel torture helmet, small bells strapped to the chest; images awaiting approval)
+- [ ] `boss_warden.glb` The Crystal Warden (redesigned as a tall knight; images awaiting approval)
+- [ ] `boss_lantern.glb` The Lantern Mother (redesigned without lanterns; images awaiting approval)
+- [ ] `boss_ossuary.glb` The Ossuary King (redesigned in bone armor; images awaiting approval)
 
 Known flaws to revisit:
 - Delver: open-toed boots, a wooden handle fused to the left hip, fur collar droops when the arms come down.
 - Feral Delver: wrist cords are stiff strands; trouser rags flare when he walks.
 - Jailer: rigged with `--no-lift` because his elbows are bent; the mask covers only the lower face (a full mask never came with level arms); wrist chains were dropped from the prompt and need adding as props.
 - Hollow Miner: stocky build with a large helmet.
-- Druid Shaman: the roughest of the six. Her fur and hair use most of the triangles, so she is exported at 25,000; her lower legs were generated fused and had to be cut apart, leaving a thin sliver near the feet; the skirt stretches when she sprints; she is dark and may be hard to see in the cave.
+- Druid Shaman: bare-chested, because the chest wrap in the prompt did not render in the chosen image. Re-roll if she should be covered.
 - All enemies use 15,000 triangles; 8,000 broke the meshes. If the laptop struggles with many on screen, add lower-detail versions.
 
 ## Other assets
