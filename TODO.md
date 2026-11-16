@@ -48,13 +48,16 @@ Known flaws to revisit:
 
 ## Game code
 
-- [ ] **Model loader.** Load `assets/<name>.glb`, map clips to states with crossfades, attach weapons to the hand bone, fall back to the block figures when a file is missing. Until this exists none of the models appear in the game.
+- [x] **Model loader.** The player, five enemies, the Bellman and the Ossuary King load from `assets/`, play idle, walk, jog, roll, hit, death and flask clips, and fall back to the block figures when a file is missing. The player's weapon sits in his right hand.
+- [ ] **Real attack, block, climb, mining and sneak animations.** These are simple arm swings for now, waiting on the full animation library.
+- [ ] **Model details.** The Chain Jailer has no shield model; enemy weapons (pickaxe, club, bone blade) are not attached; the Bellman's bells do not swing; the Warden's crystals do not glow.
+- [ ] **Lower-detail models** if the laptop struggles: every enemy on a level is a 15,000-triangle animated mesh.
 - [ ] **Sound loader.** Play `assets/*.ogg` when present, keep the synthesized fallbacks.
 - [ ] **Use the textures.** The game still draws with vertex colours.
 - [ ] **Quality settings** (Low, Medium, High).
 - [ ] **Lighting pass.** The player's back goes almost black at depth 2.
-- [ ] **Bosses.** Add the Crystal Warden (depth 2) and Lantern Mother (depth 3); rename the depth-4 boss to the Ossuary King.
-- [ ] **Rename the placeholder enemies** to the planned roster.
+- [ ] **Bosses.** Add the Crystal Warden (depth 2) and Lantern Mother (depth 3) as fights; their models are ready. The depth-4 boss is now the Ossuary King.
+- [x] **Rename the placeholder enemies** to the planned roster. The Hollow Miner replaced the flying Cave Mite, so it now walks. The stats line still says "Warden kills" and the Wardenbane sword and Warden's Heart keep their names.
 - [ ] Smaller: decide whether touch controls stay; maybe have the Bellman react to the torch.
 
 ## Pipeline improvements

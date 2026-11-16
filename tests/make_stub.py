@@ -17,6 +17,13 @@ for n in names:
 out = os.path.join(here, 'build'); os.makedirs(out, exist_ok=True)
 open(os.path.join(out, 'three-stub.mjs'), 'w').write(stub)
 html = re.sub(r'https://cdn\.jsdelivr\.net/npm/three@[^"]+/build/three\.module\.js', './three-stub.mjs', src)
+# The add-ons (model loader, skinned clone) are stubbed too. The stub loader always fails,
+# so the tests run on the primitive fallback models.
+html = re.sub(r'https://cdn\.jsdelivr\.net/npm/three@[^"]+/examples/jsm/', './addons/', html)
+for rel, code in (('loaders/GLTFLoader.js', 'export class GLTFLoader{load(u,ok,prog,err){if(err)setTimeout(()=>err(new Error("stub")),0);}}\n'),
+                  ('utils/SkeletonUtils.js', 'export function clone(o){return o;}\n')):
+    path = os.path.join(out, 'addons', rel); os.makedirs(os.path.dirname(path), exist_ok=True)
+    open(path, 'w').write(code)
 open(os.path.join(out, 'index.html'), 'w').write(html)
 open(os.path.join(out, 'game.mjs'), 'w').write(js)
 print('stub build ready:', out)

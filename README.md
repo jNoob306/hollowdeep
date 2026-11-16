@@ -10,7 +10,7 @@ pinned: false
 
 # Hollowdeep
 
-A procedurally generated 3D extraction roguelike in a single HTML file (Three.js from a CDN, no other assets).
+A procedurally generated 3D extraction roguelike in a single HTML file (Three.js from a CDN), with character models in `assets/`.
 
 Enter the cave, mine and loot through winding maze-like tunnels, then find an exit shaft and climb out to keep your backpack. Die and the backpack is lost. Craft gear at camp and go deeper.
 

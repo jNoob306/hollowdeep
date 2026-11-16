@@ -62,7 +62,7 @@ button,input{font-family:inherit}
 .ctl{font:12px/1.6 sans-serif;opacity:.85}
 .ctl b{color:#e9d9ae}
 </style>
-<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"}}</script>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
 </head>
 <body>
 <canvas id="c"></canvas>
@@ -76,7 +76,7 @@ button,input{font-family:inherit}
     <div id="packRow"></div>
   </div>
   <canvas id="map" width="352" height="352"></canvas>
-  <div id="bossBar" class="hidden"><div>The Hollow Warden</div><div class="bar"><i id="bossF"></i></div></div>
+  <div id="bossBar" class="hidden"><div>The Ossuary King</div><div class="bar"><i id="bossF"></i></div></div>
   <div id="reticle" class="hidden"></div>
   <div id="prompt" class="hidden"></div>
   <div id="chan" class="hidden"><i id="chanF"></i><span id="chanT"></span></div>
@@ -122,6 +122,8 @@ button,input{font-family:inherit}
 
 <script type="module">
 import * as THREE from 'three';
+import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
+import {clone as cloneSkinned} from 'three/addons/utils/SkeletonUtils.js';
 
 /* =====================================================================
    UTIL + RNG
@@ -172,23 +174,23 @@ const UPGRADES={
 const MAX_LOAD=20;
 // Enemy attack fields: kind, range (gap from enemy edge), arc (deg), dmg, windup/active/recover (s), lunge (speed), cd.
 const ENEMIES={
-  crawler:{n:'Crawler',hp:30,speed:4.6,r:0.5,aggro:11,poise:10,stag:0.5,
+  crawler:{n:'Feral Delver',hp:30,speed:4.6,r:0.5,aggro:11,poise:10,stag:0.5,
     attacks:[{kind:'melee',range:1.5,arc:100,dmg:10,windup:0.38,active:0.12,recover:0.5,lunge:5,cd:0.4}],
     loot:[['bone',0.5,1,1],['hide',0.3,1,1]]},
-  swarm:{n:'Cave Mite',hp:10,speed:5.6,r:0.3,aggro:12,poise:1,stag:0.3,fly:true,
+  swarm:{n:'Hollow Miner',hp:10,speed:5.6,r:0.4,aggro:12,poise:1,stag:0.3,
     attacks:[{kind:'melee',range:1.2,arc:120,dmg:5,windup:0.3,active:0.1,recover:0.6,lunge:4,cd:0.5}],
     loot:[['bone',0.2,1,1]]},
-  spitter:{n:'Spitter',hp:34,speed:2.8,r:0.5,aggro:14,keep:7,poise:10,stag:0.6,
+  spitter:{n:'Druid Shaman',hp:34,speed:2.8,r:0.5,aggro:14,keep:7,poise:10,stag:0.6,
     attacks:[{kind:'shoot',range:13,dmg:13,windup:0.7,active:0.1,recover:0.9,cd:0.8,pspeed:11}],
     loot:[['fungus',0.6,1,2],['bone',0.3,1,1]]},
-  brute:{n:'Shield Brute',hp:95,speed:2.5,r:0.75,aggro:10,poise:60,stag:0.9,shield:true,
+  brute:{n:'Chain Jailer',hp:95,speed:2.5,r:0.75,aggro:10,poise:60,stag:0.9,shield:true,
     attacks:[{kind:'melee',range:2.3,arc:120,dmg:28,windup:0.95,active:0.15,recover:1.0,lunge:2,cd:0.6}],
     loot:[['hide',0.7,1,2],['iron',0.6,1,2],['bone',0.4,1,2]]},
-  elite:{n:'Deep Stalker',hp:170,speed:4.0,r:0.6,aggro:13,poise:80,stag:0.8,
+  elite:{n:'Pale Stalker',hp:170,speed:4.0,r:0.6,aggro:13,poise:80,stag:0.8,
     attacks:[{kind:'melee',range:2.2,arc:130,dmg:22,windup:0.5,active:0.14,recover:0.6,lunge:3,cd:0.5},
              {kind:'melee',range:6.5,minRange:3,arc:70,dmg:32,windup:0.75,active:0.3,recover:0.9,lunge:16,cd:0.8}],
     loot:[['silver',1,1,2],['hide',0.6,1,2],['glow',0.4,1,1]]},
-  boss:{n:'The Hollow Warden',hp:620,speed:2.9,r:1.4,aggro:16,poise:200,stag:1.4,
+  boss:{n:'The Ossuary King',hp:620,speed:2.9,r:1.4,aggro:16,poise:200,stag:1.4,
     attacks:[{kind:'melee',range:3.2,arc:200,dmg:30,windup:0.8,active:0.18,recover:0.9,lunge:2,cd:0.6},
              {kind:'slam',range:14,minRange:3,radius:3.4,dmg:36,windup:1.1,active:0.1,recover:0.8,cd:0.7},
              {kind:'charge',range:18,minRange:6,dmg:34,windup:0.9,active:0.9,recover:1.1,lunge:17,cd:0.8,track:4},
@@ -483,26 +485,95 @@ MAT.shaftIn=new THREE.MeshLambertMaterial({color:0x6a6a70,side:THREE.BackSide});
 const cellFor=(x,z)=>Math.floor(z/CS)*GW+Math.floor(x/CS);
 
 /* =====================================================================
+   GLB CHARACTER MODELS (optional)
+   Each character is assets/<file>.glb: a skinned mesh on the shared skeleton with
+   every animation clip inside. Files load in the background; until one arrives (or
+   if it is missing) the game uses the primitive model below, then swaps it in.
+   MODEL_DEFS maps a game type to [file, height in metres the model is scaled to].
+   ===================================================================== */
+const MODEL_DEFS={player:['player',1.9],crawler:['enemy_feral',1.75],swarm:['enemy_miner',1.7],spitter:['enemy_druid',1.9],
+  brute:['enemy_jailer',2.4],elite:['enemy_stalker',2.2],boss:['boss_ossuary',3.8],bellman:['stalker_bellman',3.2]};
+const WEAPON_GRIP=[0.9,0,0]; // how the weapon sits in the right hand bone (radians): blade forward, tip slightly raised
+const RIG_LIT=0.2;           // self-lighting for textured characters, so dark clothes still read in the cave
+const GLB={},RIG_BONES=['spine_02','upperarm_r','upperarm_l','hand_r','hand_l'];
+const _bq=new THREE.Quaternion(),_bp=new THREE.Quaternion(),_bax=new THREE.Vector3(),_UP=new THREE.Vector3(0,1,0);
+function prepModel(key,gltf){
+  // Measure the character in its rest pose. A skinned mesh only reports its true size once its bones are up to date.
+  gltf.scene.updateMatrixWorld(true);const box=new THREE.Box3();
+  gltf.scene.traverse(o=>{if(o.isMesh){o.geometry.userData.shared=true;if(o.isSkinnedMesh){o.skeleton.update();o.computeBoundingBox();box.union(o.boundingBox.clone().applyMatrix4(o.matrixWorld));}}});
+  const h=MODEL_DEFS[key][1],size=box.max.y-box.min.y,clips={};
+  // Keep bone rotations and the hip bob only: no scale tracks and no root motion, the game moves the character.
+  for(const c of gltf.animations)clips[c.name]=new THREE.AnimationClip(c.name,c.duration,c.tracks.filter(k=>k.name.endsWith('.quaternion')||k.name==='pelvis.position'));
+  GLB[key]={scene:gltf.scene,clips,scale:h/Math.max(size,0.01),rel:h/1.8};
+}
+function loadModels(){
+  const loader=new GLTFLoader();
+  for(const key in MODEL_DEFS)loader.load('assets/'+MODEL_DEFS[key][0]+'.glb',g=>{try{prepModel(key,g);modelReady(key);}catch(err){console.warn('model',key,err);}},undefined,()=>{});
+}
+function makeRig(key){
+  const t=GLB[key],root=cloneSkinned(t.scene),mats=[],bones={};root.scale.setScalar(t.scale);
+  root.traverse(o=>{
+    if(o.isMesh){const tex=o.material.map||null,m=new THREE.MeshLambertMaterial({map:tex,emissiveMap:tex});m.emissive.setRGB(RIG_LIT,RIG_LIT,RIG_LIT);m.userData.own=true;o.material=m;mats.push(m);o.frustumCulled=false;}
+    if(o.isBone&&RIG_BONES.includes(o.name))bones[o.name]=o;});
+  return{key,root,mixer:new THREE.AnimationMixer(root),acts:{},cur:null,tok:null,bones,mats,rel:t.rel,scale:t.scale,lx:null,lz:0,v:0};
+}
+// Cross-fade to a clip. "once" clips play through and hold their last frame; a new token restarts them.
+function rigPlay(r,name,ts=1,once=false,fade=0.18,tok=null){
+  const c=GLB[r.key].clips[name];if(!c)return 0;
+  const a=r.acts[name]||(r.acts[name]=r.mixer.clipAction(c));
+  if(r.cur!==name||r.tok!==tok){const prev=r.acts[r.cur];a.reset();a.setLoop(once?THREE.LoopOnce:THREE.LoopRepeat,Infinity);a.clampWhenFinished=once;a.enabled=true;a.setEffectiveWeight(1);
+    if(prev&&prev!==a)a.crossFadeFrom(prev,fade,false);a.play();r.cur=name;r.tok=tok;}
+  a.timeScale=ts;return c.duration;
+}
+// Smoothed ground speed from how far the character moved since the last frame.
+function rigSpeed(r,x,z,dt){if(r.lx!==null&&dt>0){const v=Math.hypot(x-r.lx,z-r.lz)/dt;r.v+=(Math.min(v,12)-r.v)*Math.min(1,dt*10);}r.lx=x;r.lz=z;return r.v;}
+function rigMove(r){const v=r.v,k=r.rel;if(v<0.35)rigPlay(r,'Idle_Loop');else if(v<3.1*k)rigPlay(r,'Walk_Loop',clamp(v/(1.45*k),0.5,1.9));else rigPlay(r,'Jog_Fwd_Loop',clamp(v/(3.6*k),0.7,1.6));}
+// Rotate a bone about the character's sideways axis on top of the playing clip (arm swings, leaning).
+// Stands in for attack, block and mining clips, which the animation set does not have yet.
+function rigTwist(b,ang,yaw){if(!b||!ang)return;_bax.set(1,0,0).applyAxisAngle(_UP,yaw);b.parent.getWorldQuaternion(_bp);_bq.setFromAxisAngle(_bax,ang);
+  b.quaternion.premultiply(_bp).premultiply(_bq).premultiply(_bp.invert());}
+function modelReady(key){
+  if(key==='player'){if(player.model)refreshPlayerModel();return;}
+  if(!levelGroup)return;
+  for(const e of enemies)if(e.type===key&&e.alive&&!e.model.rig){levelGroup.remove(e.model.g);disposeGroup(e.model.g);e.model=buildEnemyModel(key);levelGroup.add(e.model.g);}
+}
+
+/* =====================================================================
    ENTITY MODELS (low-poly, built from primitives)
    ===================================================================== */
-function buildPlayerModel(){
-  const g=new THREE.Group(),tilt=new THREE.Group();g.add(tilt);
-  const a=ARMORS[save.equip.a],w=WEAPONS[save.equip.w];
-  const bm=lam(a.col),skin=lam(0xc9a27e),dark=lam(0x2e2822),wm=lam(w.col,w.type==='spear'&&w.col===0x58d8ff?0x104a66:0);
-  tilt.add(mk(GEO.cap,bm,0,0.98,0,0.62,0.52,0.48));tilt.add(mk(GEO.box,dark,-0.14,0.27,0,0.18,0.54,0.2));tilt.add(mk(GEO.box,dark,0.14,0.27,0,0.18,0.54,0.2));
-  tilt.add(mk(GEO.sph,skin,0,1.68,0,0.36));tilt.add(mk(GEO.cone,bm,0,1.86,-0.02,0.42,0.3,0.42));
-  const armR=new THREE.Group();armR.position.set(-0.38,1.42,0);tilt.add(armR);armR.add(mk(GEO.box,bm,0,-0.25,0,0.13,0.5,0.13));
-  const hold=new THREE.Group();hold.position.set(0,-0.5,0);hold.rotation.x=Math.PI/2;armR.add(hold);
+// The equipped weapon as a small group of primitives, grip at the origin, blade along +Y.
+function weaponProp(w){
+  const hold=new THREE.Group(),dark=lam(0x2e2822),wm=lam(w.col,w.type==='spear'&&w.col===0x58d8ff?0x104a66:0);
   if(w.type==='sword'){hold.add(mk(GEO.box,wm,0,w.len/2+0.1,0,0.09,w.len,0.03));hold.add(mk(GEO.box,dark,0,0.08,0,0.3,0.05,0.07));}
   else if(w.type==='axe'){hold.add(mk(GEO.box,MAT.wood,0,w.len/2,0,0.06,w.len,0.06));hold.add(mk(GEO.box,wm,0.12,w.len-0.12,0,0.34,0.36,0.05));}
   else{hold.add(mk(GEO.box,MAT.wood,0,w.len/2-0.3,0,0.05,w.len,0.05));hold.add(mk(GEO.cone,wm,0,w.len-0.15,0,0.12,0.4,0.12));}
+  return hold;
+}
+function slashArc(w){
+  const arc=THREE.MathUtils.degToRad(w.arc),sl=new THREE.Mesh(new THREE.RingGeometry(w.range*0.45,w.range,14,1,Math.PI/2-arc/2,arc),MAT.slash);
+  sl.rotation.x=Math.PI/2;sl.position.y=1.05;sl.visible=false;return sl;
+}
+function buildPlayerModel(){
+  const g=new THREE.Group(),w=WEAPONS[save.equip.w];
+  if(GLB.player){
+    const rig=makeRig('player'),sl=slashArc(w);g.add(rig.root);g.add(sl);
+    if(rig.bones.hand_r){const hold=weaponProp(w);hold.scale.setScalar(1/rig.scale);hold.rotation.set(WEAPON_GRIP[0],WEAPON_GRIP[1],WEAPON_GRIP[2]);rig.bones.hand_r.add(hold);}
+    return{g,rig,slash:sl};
+  }
+  const tilt=new THREE.Group();g.add(tilt);
+  const a=ARMORS[save.equip.a];
+  const bm=lam(a.col),skin=lam(0xc9a27e),dark=lam(0x2e2822);
+  tilt.add(mk(GEO.cap,bm,0,0.98,0,0.62,0.52,0.48));tilt.add(mk(GEO.box,dark,-0.14,0.27,0,0.18,0.54,0.2));tilt.add(mk(GEO.box,dark,0.14,0.27,0,0.18,0.54,0.2));
+  tilt.add(mk(GEO.sph,skin,0,1.68,0,0.36));tilt.add(mk(GEO.cone,bm,0,1.86,-0.02,0.42,0.3,0.42));
+  const armR=new THREE.Group();armR.position.set(-0.38,1.42,0);tilt.add(armR);armR.add(mk(GEO.box,bm,0,-0.25,0,0.13,0.5,0.13));
+  const hold=weaponProp(w);hold.position.set(0,-0.5,0);hold.rotation.x=Math.PI/2;armR.add(hold);
   const armL=new THREE.Group();armL.position.set(0.38,1.42,0);tilt.add(armL);armL.add(mk(GEO.box,bm,0,-0.25,0,0.13,0.5,0.13));
   armL.add(mk(GEO.box,lam(0x4a4038),0.1,-0.35,0.14,0.07,0.62,0.48));
-  const arc=THREE.MathUtils.degToRad(w.arc),sl=new THREE.Mesh(new THREE.RingGeometry(w.range*0.45,w.range,14,1,Math.PI/2-arc/2,arc),MAT.slash);
-  sl.rotation.x=Math.PI/2;sl.position.y=1.05;sl.visible=false;g.add(sl);
+  const sl=slashArc(w);g.add(sl);
   return{g,tilt,armR,armL,slash:sl};
 }
 function buildEnemyModel(type){
+  if(GLB[type]){const g=new THREE.Group(),rig=makeRig(type);g.add(rig.root);return{g,tilt:g,mats:rig.mats,rig,arm:null,arm2:null,bell:null};}
   const g=new THREE.Group(),tilt=new THREE.Group();g.add(tilt);const mats=[];let arm=null,arm2=null,bell=null;
   const own=(c,e=0)=>{const m=lam(c,e);m.userData.own=true;mats.push(m);return m;};
   const eyes=(y,z,dx,s)=>{tilt.add(mk(GEO.sph,MAT.eye,-dx,y,z,s));tilt.add(mk(GEO.sph,MAT.eye,dx,y,z,s));};
@@ -711,10 +782,10 @@ function damageEnemy(e,dmg,heavy){const p=player,d=e.d;
   if(e.state==='idle'||e.state==='patrol'){e.state='chase';if(e.type==='boss')bossRef=e;}
   e.poise-=heavy?60:25;
   if(e.hp<=0){killEnemy(e);return;}
-  if(e.type==='boss'&&!e.phase2&&e.hp<e.maxHp*0.5){e.phase2=true;e.state='stagger';e.t=1.3;e.poise=d.poise;hideRing(e);toast('The Warden rages!');sfx('tele');cam.shake=0.6;
+  if(e.type==='boss'&&!e.phase2&&e.hp<e.maxHp*0.5){e.phase2=true;e.state='stagger';e.t=1.3;e.poise=d.poise;hideRing(e);toast('The King rages!');sfx('tele');cam.shake=0.6;
     for(const m of e.model.mats)m.color.setHex(0x6a2a30);return;}
   if(e.poise<=0&&e.state!=='stagger'){e.state='stagger';e.t=d.stag;hideRing(e);}}
-function killEnemy(e){makeNoise(e.x,e.z,14);e.alive=false;e.deathT=0.35;e.bar.visible=false;hideRing(e);run.kills++;if(lockT===e)lockT=null;
+function killEnemy(e){makeNoise(e.x,e.z,14);e.alive=false;e.deathT=e.model.rig?2.4:0.35;e.bar.visible=false;hideRing(e);run.kills++;if(lockT===e)lockT=null;
   for(const[mat,ch,a,b]of e.d.loot)if(Math.random()<ch)spawnPickup(mat,a+Math.floor(Math.random()*(b-a+1)),e.x,e.z);
   if(e.type==='boss'){run.boss=true;bossRef=null;$('bossBar').classList.add('hidden');toast('THE HOLLOW WARDEN HAS FALLEN');sfx('win');}}
 function damagePlayer(dmg,sx,sz,unblockable){const p=player;if(p.state==='dead'||state!=='run'||p.iframes>0)return false;let blk=false;
@@ -836,7 +907,7 @@ function updateEnemy(e,dt){
   const sp=d.speed*(e.phase2?1.3:1),gap=dist-e.r;
   switch(e.state){
     case'idle':case'patrol':
-      if(p.state!=='dead'&&((dist<d.aggro&&e.see)||dist<3.5)){e.state='chase';if(e.type==='boss'){bossRef=e;toast('The Hollow Warden awakens');}break;}
+      if(p.state!=='dead'&&((dist<d.aggro&&e.see)||dist<3.5)){e.state='chase';if(e.type==='boss'){bossRef=e;toast('The Ossuary King awakens');}break;}
       if(e.state==='idle'){e.t-=dt;if(e.t<=0){const a=Math.random()*6.28,r=1.5+Math.random()*4;e.tx=e.home.x+Math.sin(a)*r;e.tz=e.home.z+Math.cos(a)*r;e.state='patrol';e.t=3;}}
       else{const ax=e.tx-e.x,az=e.tz-e.z,ad=Math.hypot(ax,az);e.t-=dt;
         if(ad<0.4||e.t<=0){e.state='idle';e.t=1+Math.random()*3;}else{e.facing=Math.atan2(ax,az);moveCircle(e,ax/ad*sp*0.35*dt,az/ad*sp*0.35*dt,e.r);}}
@@ -974,7 +1045,7 @@ function endRun(kind,how){
   writeSave();player.pack=[];
   $('sumTitle').textContent=kind==='extract'?'EXTRACTED':kind==='abandon'?'RUN ABANDONED':'YOU DIED';$('sumTitle').style.color=kind==='extract'?'#9be29b':'#ff6a5a';
   $('sumBody').innerHTML=`<h3>${kind==='extract'?'Loot brought home':'Loot lost in the dark'}</h3>${list}
-    <h3>Run</h3><div class="ctl">Deepest level: <b>${run.deepest}</b><br>Kills: <b>${run.kills}</b><br>${kind==='extract'?'Exit used: <b>'+how+'</b><br>':''}${kind==='death'&&run.killedBy?'<b>Taken by '+run.killedBy+'</b><br>':''}${run.boss?'<b>The Hollow Warden was slain</b><br>':''}Seed: <b>${seedCode(run.seed)}</b></div>`;
+    <h3>Run</h3><div class="ctl">Deepest level: <b>${run.deepest}</b><br>Kills: <b>${run.kills}</b><br>${kind==='extract'?'Exit used: <b>'+how+'</b><br>':''}${kind==='death'&&run.killedBy?'<b>Taken by '+run.killedBy+'</b><br>':''}${run.boss?'<b>The Ossuary King was slain</b><br>':''}Seed: <b>${seedCode(run.seed)}</b></div>`;
   $('summary').classList.remove('hidden');$('hud').classList.add('hidden');$('pause').classList.add('hidden');if(device==='pad')$('sumBtn').focus();
 }
 function pauseRun(){if(state!=='run')return;state='pause';hadLock=false;if(document.pointerLockElement)document.exitPointerLock();$('pause').classList.remove('hidden');if(device==='pad')$('resume').focus();}
@@ -1026,8 +1097,24 @@ function updateCamera(dt){
 /* =====================================================================
    RENDER-SIDE UPDATES (animation, lights, particles, HUD, map)
    ===================================================================== */
-function animPlayer(t){
-  const p=player,m=p.model;if(!m)return;let y=p.y,lean=0,armR=-0.4,armL=0,sy=1;m.slash.visible=false;
+function animPlayerRig(dt,t){
+  const p=player,m=p.model,r=m.rig;let y=p.y,lean=0,aR=0,aL=0;m.slash.visible=false;rigSpeed(r,p.x,p.z,dt);
+  if(p.state==='attack'){const a=p.atk;let arm;
+    if(a.t<a.wu)arm=lerp(-0.4,-2.8,a.t/a.wu);else if(a.t<a.wu+a.ac){arm=lerp(-2.8,0.2,(a.t-a.wu)/a.ac);lean=0.3;}else{arm=lerp(0.2,-0.4,(a.t-a.wu-a.ac)/a.rc);lean=0.14;}
+    aR=arm+0.4;rigPlay(r,'Idle_Loop',1,false,0.1);
+    const st=a.t-a.wu;if(st>=0&&st<a.ac+0.1){m.slash.visible=true;MAT.slash.opacity=0.55*(1-st/(a.ac+0.1));}}
+  else if(p.state==='roll'){const d=GLB.player.clips.Roll?GLB.player.clips.Roll.duration:1;rigPlay(r,'Roll',d*0.8/p.roll.dur,true,0.06,p.roll);}
+  else if(p.state==='flask')rigPlay(r,'Consume',1.4,true,0.1,'flask');
+  else if(p.state==='stagger')rigPlay(r,'Hit_Chest',1,true,0.05,'stagger');
+  else if(p.state==='dead')rigPlay(r,'Death01',1,true,0.1,'dead');
+  else if(p.state==='channel'){if(p.chan.climb){rigPlay(r,'Jump_Loop');y+=p.chan.t/p.chan.dur*2.5;aR=aL=-2.3;}else{rigPlay(r,'Idle_Loop');aR=-0.9+Math.sin(t*14)*0.55;lean=0.22;}}
+  else{rigMove(r);if(p.blocking)aL=-1.3;}
+  m.g.position.set(p.x,y,p.z);m.g.rotation.y=p.facing;r.mixer.update(dt);
+  rigTwist(r.bones.spine_02,lean,p.facing);rigTwist(r.bones.upperarm_r,aR,p.facing);rigTwist(r.bones.upperarm_l,aL,p.facing);
+  m.g.visible=!(p.iframes>0&&p.state!=='roll'&&Math.floor(t*30)%2);
+}
+function animPlayer(t,dt){
+  const p=player,m=p.model;if(!m)return;if(m.rig)return animPlayerRig(dt,t);let y=p.y,lean=0,armR=-0.4,armL=0,sy=1;m.slash.visible=false;
   if(p.state==='attack'){const a=p.atk;
     if(a.t<a.wu)armR=lerp(-0.4,-2.8,a.t/a.wu);else if(a.t<a.wu+a.ac){armR=lerp(-2.8,0.2,(a.t-a.wu)/a.ac);lean=0.25;}else{armR=lerp(0.2,-0.4,(a.t-a.wu-a.ac)/a.rc);lean=0.12;}
     const st=a.t-a.wu;if(st>=0&&st<a.ac+0.1){m.slash.visible=true;MAT.slash.opacity=0.55*(1-st/(a.ac+0.1));}}
@@ -1040,8 +1127,9 @@ function animPlayer(t){
   m.g.position.set(p.x,y,p.z);m.g.rotation.y=p.facing;m.tilt.rotation.x=lean;m.tilt.scale.y=sy;m.armR.rotation.x=armR;m.armL.rotation.x=armL;
   m.g.visible=!(p.iframes>0&&p.state!=='roll'&&Math.floor(t*30)%2);
 }
-function animEnemy(e,t){
-  const g=e.model.g;if(!e.alive){if(e.deathT>0)g.scale.setScalar(Math.max(0.01,e.deathT/0.35));return;}
+function animEnemy(e,t,dt){
+  const g=e.model.g,r=e.model.rig;
+  if(!e.alive){if(e.deathT>0){if(r){rigPlay(r,'Death01',1,true,0.1,'dead');r.mixer.update(dt);}g.scale.setScalar(Math.max(0.01,Math.min(1,e.deathT/0.35)));}return;}
   g.position.set(e.x,e.y+(e.d.fly?1.1+Math.sin(t*6+e.ph)*0.15:0),e.z);g.rotation.y=e.facing;
   let lean=0,arm=-0.3,glow=0,rz=0;
   if(e.state==='windup'){const k=1-e.t/e.wu;lean=-0.28*k;arm=-0.3-2.3*k;glow=0.25+0.75*k;}
@@ -1049,9 +1137,14 @@ function animEnemy(e,t){
   else if(e.state==='recover'){lean=0.15;arm=0.3;}
   else if(e.state==='stagger'){lean=-0.3;rz=Math.sin(t*30)*0.08;}
   else if(e.state==='patrol'||e.state==='chase'||e.state==='wander'||e.state==='hunt')lean=Math.sin(t*8+e.ph)*0.04;
-  e.model.tilt.rotation.x=lean;g.rotation.z=rz;if(e.model.arm)e.model.arm.rotation.x=arm;if(e.model.arm2)e.model.arm2.rotation.x=arm;
+  if(r){rigSpeed(r,e.x,e.z,dt);
+    if(e.state==='stagger')rigPlay(r,'Hit_Chest',1,false,0.06);else if(e.state==='windup'||e.state==='active'||e.state==='recover')rigPlay(r,'Idle_Loop',1,false,0.12);else rigMove(r);
+    r.mixer.update(dt);g.rotation.z=rz;
+    const da=arm+0.3,two=e.type==='boss'||e.type==='bellman';
+    rigTwist(r.bones.spine_02,lean,e.facing);rigTwist(r.bones.upperarm_r,da,e.facing);if(two)rigTwist(r.bones.upperarm_l,da,e.facing);}
+  else{e.model.tilt.rotation.x=lean;g.rotation.z=rz;if(e.model.arm)e.model.arm.rotation.x=arm;if(e.model.arm2)e.model.arm2.rotation.x=arm;}
   if(e.model.bell){e.model.bell.rotation.z=Math.sin(e.walkPh)*0.07+e.swing*Math.sin(t*9)*0.35;e.model.bell.rotation.x=Math.cos(e.walkPh*0.5)*0.05;}
-  const f=e.flash>0;for(const m of e.model.mats)m.emissive.setRGB(f?0.8:glow*0.9,f?0.8:glow*0.22,f?0.8:0);
+  const f=e.flash>0,lit=r?RIG_LIT:0;for(const m of e.model.mats)m.emissive.setRGB(f?0.8:glow*0.9+lit,f?0.8:glow*0.22+lit,f?0.8:lit);
   const show=e.hp<e.maxHp&&e.type!=='boss';e.bar.visible=show;
   if(show){e.bar.position.set(e.x,e.y+(e.d.fly?1.9:e.r*2+1.5),e.z);e.bar.quaternion.copy(camera.quaternion);const k=clamp(e.hp/e.maxHp,0,1);e.fg.scale.x=1.06*k;e.fg.position.x=-0.53*(1-k);}
 }
@@ -1105,7 +1198,7 @@ function drawMap(){const c=mctx,S=8;c.clearRect(0,0,352,352);
   for(const e of L.exits)if(e.found){c.fillStyle='#5aff8a';c.fillRect(e.cx*S-3,e.cz*S-3,S+6,S+6);c.fillStyle='#062';c.fillRect(e.cx*S+2,e.cz*S+1,S-4,S-2);}
   const p=player,px=p.x/CS*S,pz=p.z/CS*S;c.save();c.translate(px,pz);c.rotate(-p.facing);c.fillStyle='#ffd27a';c.beginPath();c.moveTo(0,9);c.lineTo(-6,-6);c.lineTo(6,-6);c.closePath();c.fill();c.restore();}
 function renderRun(dt,t){
-  animPlayer(t);for(const e of enemies)animEnemy(e,t);updateCamera(dt);updateListener();updateLights(t);updateDust(dt);
+  animPlayer(t,dt);for(const e of enemies)animEnemy(e,t,dt);updateCamera(dt);updateListener();updateLights(t);updateDust(dt);
   for(const q of projs)if(q.on)q.m.position.set(q.x,q.y,q.z);
   for(const r of rings)if(r.on){const k=clamp(r.t/r.dur,0,1);r.d.scale.setScalar(Math.max(0.01,k));}
   for(const k of pickups){k.m.rotation.y=t*2;k.m.position.y=floorH(k.x,k.z)+0.5+Math.sin(t*3+k.x)*0.1;}
@@ -1207,9 +1300,10 @@ function frame(now){
   else{pressed={};renderer.render(scene,camera);}
 }
 resize();renderCamp();$('touch').classList.toggle('hidden',device!=='touch');
+loadModels();
 requestAnimationFrame(frame);
 // Small debug handle (used for automated testing; harmless in play).
-window.__hd={get state(){return state;},get L(){return L;},get run(){return run;},get save(){return save;},get enemies(){return enemies;},get lock(){return lockT;},get bell(){return bellRef;},get bellCount(){return bellCount;},makeNoise,player,cam,press,keys,startRun,generateLevel,addToPack,damagePlayer,damageEnemy,endRun,toCamp,loadLevel};
+window.__hd={get state(){return state;},get models(){return GLB;},get L(){return L;},get run(){return run;},get save(){return save;},get enemies(){return enemies;},get lock(){return lockT;},get bell(){return bellRef;},get bellCount(){return bellCount;},makeNoise,player,cam,press,keys,startRun,generateLevel,addToPack,damagePlayer,damageEnemy,endRun,toCamp,loadLevel};
 </script>
 </body>
 </html>

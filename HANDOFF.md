@@ -31,6 +31,12 @@ The game is playable end to end: camp → cave → exit shaft or death → camp 
 - **Lock-on:** R3 locks on; flick the right stick or press D-pad left/right to switch target.
 - **Other:** View or Y opens the map, Menu pauses.
 
+## Model loader (added in Claude Code)
+
+All ten characters are generated, rigged and in `assets/`. The game loads eight of them (the Crystal Warden and Lantern Mother have models but no fight yet). See `CLAUDE.md` for how the loader works and `TODO.md` for what is left.
+
+The shared skeleton has these 21 clips: `Idle_Loop`, `Walk_Loop`, `Jog_Fwd_Loop`, `Sprint_Loop`, `Roll`, `Hit_Chest`, `Death01`, `Consume`, `Chest_Open`, `Jump_Start`, `Jump_Loop`, `Jump_Land`, `Dance_Loop`, `Swim_Fwd_Loop`, `Swim_Idle_Loop` and six `Pistol_*` clips. There are no melee, block, climb, mining or sneak clips, so the game fakes those with arm swings.
+
 ## Decisions made with the user
 
 - **Look:** an over-the-shoulder, Souls-like third-person camera, not top-down.
