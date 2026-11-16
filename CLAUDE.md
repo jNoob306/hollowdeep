@@ -12,6 +12,7 @@ It is hosted as a **static Hugging Face Space** (`README.md` holds the Space con
 - `docs/ASSETS.md` lists every art, sound and texture asset, with generation prompts, the free open-source pipeline and the expected file names.
 - `tests/` holds headless logic tests that run without a GPU (see Testing).
 - `tools/` holds the asset pipeline (see `HANDOFF.md`). `fetch_textures.py` and `fetch_sounds.py` download CC0 files into `assets/`; `generate_models.py` makes concept images (`art/src/`) and raw meshes (`art/raw/`) on free Hugging Face ZeroGPU Spaces; `rig_character.py` reduces a raw mesh, skins it to the shared skeleton in `art/rig/ual_rig.glb` and exports `assets/<name>.glb` with every clip. Blender runs as the `bpy` Python module (`pip install bpy gradio_client`).
+- `tools/upload_space.py` uploads the playable game (`index.html`, `README.md`, the `.glb` models, credits) to the Space `jNoob306/hollowdeep`. Only upload when the user asks; it is public.
 - Never call paid Hugging Face services (Inference Providers). Generate one 3D model per command, only from an image the user approved, and stop on any quota error.
 - Freesound refuses requests from cloud sessions, so `fetch_sounds.py` runs on the user's laptop.
 

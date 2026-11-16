@@ -6,6 +6,7 @@ A running list so nothing gets forgotten. Tick items off as they are done. The l
 
 - [ ] **Sounds.** Run `tools/fetch_sounds.py` on your laptop (Freesound refuses the cloud session), audition the candidates, then upload the `assets` folder here. Steps: install Python and ffmpeg, put the key in `.env`, then `shortlist`, `pick`, `build`.
 - [ ] **Full animation library.** Download the free standard Universal Animation Library from https://quaternius.itch.io/universal-animation-library and upload the zip. The 21 clips we have lack sword attacks, block, climb, mining, sneak, crawl and zombie walks.
+- [ ] **Play-test the Space.** The current build is live at https://huggingface.co/spaces/jNoob306/hollowdeep (direct link: https://jnoob306-hollowdeep.static.hf.space). Use the direct link if the controller or mouse look does not respond in the embedded page.
 - [ ] **Real-browser check on the laptop.** Frame rate, how dark the cave is, bell loudness and direction, whether the Bellman chase feels fair. None of this can be judged from the cloud.
 - [ ] **Texture picks.** Look at wet rock (reads as cut stone blocks) and rust (bright orange on pale metal) and say whether to swap them.
 - [ ] **Optional tidy-up.** `quaternius.com` is on the environment's allowed list but turned out not to be needed.
@@ -52,6 +53,7 @@ Known flaws to revisit:
 - [ ] **Real attack, block, climb, mining and sneak animations.** These are simple arm swings for now, waiting on the full animation library.
 - [ ] **Model details.** The Chain Jailer has no shield model; enemy weapons (pickaxe, club, bone blade) are not attached; the Bellman's bells do not swing; the Warden's crystals do not glow.
 - [ ] **Lower-detail models** if the laptop struggles: every enemy on a level is a 15,000-triangle animated mesh.
+- [x] **Map setting.** Pause menu and camp Controls tab: mini-map and full map, full map only, or off.
 - [ ] **Sound loader.** Play `assets/*.ogg` when present, keep the synthesized fallbacks.
 - [ ] **Use the textures.** The game still draws with vertex colours.
 - [ ] **Quality settings** (Low, Medium, High).
