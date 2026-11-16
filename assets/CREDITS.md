@@ -20,5 +20,5 @@ Every file here is CC0 (public domain) or generated for this project.
 | --- | --- | --- |
 | `player.glb` (mesh and texture) | Generated for this project: FLUX.1 schnell image (`art/src/player_s5.png`), TRELLIS.2 image-to-3D, reduced and skinned by `tools/rig_character.py` | Generated |
 | `enemy_feral.glb`, `enemy_stalker.glb`, `enemy_miner.glb`, `enemy_jailer.glb`, `enemy_druid.glb` (mesh and texture) | Generated the same way from `art/src/enemy_feral_s1.png`, `enemy_stalker_s1.png`, `enemy_miner_s16.png`, `enemy_jailer_s24.png` and `enemy_druid_s13.png` | Generated |
-| `boss_lantern.glb`, `boss_ossuary.glb`, `boss_warden.glb` (mesh and texture) | Generated the same way from `art/src/boss_lantern_s11.png`, `boss_ossuary_s11.png` and `boss_warden_s21.png` | Generated |
+| `boss_lantern.glb`, `boss_ossuary.glb`, `boss_warden.glb`, `stalker_bellman.glb` (mesh and texture) | Generated the same way from `art/src/boss_lantern_s11.png`, `boss_ossuary_s11.png`, `boss_warden_s21.png` and `stalker_bellman_s41.png` | Generated |
 | Skeleton and animation clips in every character GLB, and `art/rig/ual_rig.glb` | Quaternius Universal Animation Library and Quaternius character models, https://quaternius.com | CC0 |

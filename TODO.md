@@ -20,7 +20,7 @@ Image approved by you → 3D model → rigged GLB in `assets/`.
 - [x] `enemy_druid.glb` Druid Shaman (seed 13, simplified outfit; replaced the Spore Hermit)
 - [x] `enemy_jailer.glb` Chain Jailer (seed 24)
 - [x] `enemy_stalker.glb` Pale Stalker (seed 1)
-- [ ] `stalker_bellman.glb` The Bellman (redesigned: a blank iron ball for a head, bells hooked into the chest; images awaiting approval)
+- [x] `stalker_bellman.glb` The Bellman (seed 41: a blank ball for a head, bells on the chest)
 - [x] `boss_warden.glb` The Crystal Warden (seed 21, crystal mage)
 - [x] `boss_lantern.glb` The Lantern Mother (seed 11; lanterns still to be added as props)
 - [x] `boss_ossuary.glb` The Ossuary King (seed 11)
@@ -33,7 +33,8 @@ Known flaws to revisit:
 - Ossuary King: the glowing heart pokes out of the ribcage when he leans forward.
 - Lantern Mother: the dress hangs to her shins and stretches when she sprints.
 - Crystal Warden: his crystals came out dark grey in 3D, not glowing blue; the game should make them glow. He needs a crystal staff in place of the portcullis club.
-- Bosses are exported at 20,000 triangles.
+- Bellman: the ball came out pale yellow, not rusted iron, and the chest bells are small lumps; the blood and stitches from the prompt are missing.
+- Bosses and the Bellman are exported at 20,000 triangles.
 - Druid Shaman: bare-chested, because the chest wrap in the prompt did not render in the chosen image. Re-roll if she should be covered.
 - All enemies use 15,000 triangles; 8,000 broke the meshes. If the laptop struggles with many on screen, add lower-detail versions.
 
